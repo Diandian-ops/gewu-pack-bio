@@ -1,0 +1,23 @@
+{
+  "$schema": "../manifest.schema.json",
+  "id": "cellchat",
+  "kind": "plugin",
+  "pluginId": "cellchat",
+  "pluginVersion": "1.0.0",
+  "entryPoint": "scripts/cellchat.R",
+  "environmentFile": "environment.json",
+  "toolDefinitionFile": "tool-definition.json",
+  "acceptanceFile": "acceptance.json",
+  "inputSchema": "schema/input.schema.json",
+  "outputSchema": "schema/output.schema.json",
+  "reportTemplateFile": "cellchat-report-template.html",
+  "demoDataDir": "demo-data",
+  "placeholderFigure": "tools/figures/heatmap_placeholder.png",
+  "ipcChannel": "tools:invoke/cellchat",
+  "platforms": ["macos-arm64"],
+  "builtAgainst": {
+    "r": "4.5",
+    "CellChat": "1.6.1",
+    "Seurat": "5.5.1"
+  }
+}

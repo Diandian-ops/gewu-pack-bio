@@ -1,0 +1,35 @@
+# BioF3 R 运行时基础包 (biof3-r-runtime)
+# 与 resources/built-in-plugins/manifest.json 中 biof3-r-runtime 的声明一致
+# （R 4.5 + ggplot2/dplyr/data.table/BiocGenerics 等 70+ 包）。
+#
+# 这里列出「基础集 + 各 R 插件直接依赖」；其余为传递依赖，由安装器自动带入。
+# 统一通过 BiocManager::install 安装（CRAN 与 Bioconductor 包均可，
+# BiocManager 会自动按需从 CRAN 拉取）。
+#
+# 一行一个包名；# 开头为注释。
+
+ggplot2
+dplyr
+data.table
+BiocGenerics
+Seurat
+WGCNA
+clusterProfiler
+DESeq2
+ggrepel
+pheatmap
+apeglm
+jsonlite
+digest
+enrichplot
+DOSE
+org.Hs.eg.db
+org.Mm.eg.db
+KEGGREST
+msigdbr
+flashClust
+impute
+base64enc
+qqman
+pwr
+metafor

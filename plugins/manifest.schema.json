@@ -1,0 +1,150 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://biof3.local/schemas/built-in-plugins/manifest.schema.json",
+  "title": "BioF3 Built-in Plugin Manifest",
+  "description": "Per-platform artifact schema for BioF3 Runtime and plugin distribution. Each plugin declares per-platform artifacts (url/sha256/sizeBytes). sha256 and sizeBytes may be null and filled by CI in Week 4 — but url MUST match the platformId it sits under.",
+  "type": "object",
+  "required": ["version", "plugins"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": {
+      "type": "string",
+      "description": "Manifest format version (semver-ish, e.g. '2.0.0'). Bumped when the schema itself changes."
+    },
+    "updated": { "type": "string", "description": "ISO date the manifest was last edited" },
+    "plugins": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/PluginEntry" }
+    }
+  },
+  "definitions": {
+    "PlatformId": {
+      "type": "string",
+      "enum": ["macos-arm64", "macos-x64", "windows-x64", "linux-x64"]
+    },
+    "Artifact": {
+      "type": "object",
+      "description": "Per-platform download artifact. sha256/sizeBytes may be null pre-Week-4; url MUST match the platformId key it lives under.",
+      "required": ["url", "sha256", "sizeBytes"],
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": ["string", "null"],
+          "description": "HTTPS URL to the artifact zip/tar. Must be hosted on a host in ALLOWED_RUNTIME_HOSTS. Null only for built-in://... pseudo-URLs."
+        },
+        "sha256": {
+          "type": ["string", "null"],
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "Lowercase hex SHA-256 (64 chars). Null allowed pre-Week-4 — Week 4 fill-in from CI artifact."
+        },
+        "sizeBytes": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Downloaded archive size in bytes (integer >= 0). Null allowed pre-Week-4."
+        }
+      }
+    },
+    "PluginEntry": {
+      "type": "object",
+      "required": ["id", "title", "version", "kind", "artifacts"],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$",
+          "description": "Plugin id; kebab-case, must match the key under manifest.plugins"
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-z0-9.]+)?$",
+          "description": "Semver"
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["runtime", "plugin"],
+          "description": "Top-level kind; 'runtime' for R/Python Runtime, 'plugin' for everything else (FigCode cards/data, content plugins, etc.)"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["runtime", "figcode-card", "figcode-data", "content-plugin"],
+          "description": "Subtype preserved for code paths (installRuntime / installFigcodePack / installContentPlugin). Legacy field, keep in sync with kind."
+        },
+        "language": {
+          "type": "string",
+          "enum": ["r", "python"]
+        },
+        "description": { "type": "string" },
+        "artifacts": {
+          "type": "object",
+          "description": "Per-platform artifact map. Each key MUST be a PlatformId, and the value's url host MUST match the key (no platform mismatch).",
+          "additionalProperties": { "$ref": "#/definitions/Artifact" },
+          "propertyNames": { "$ref": "#/definitions/PlatformId" }
+        },
+        "checksumAlgorithm": {
+          "type": "string",
+          "enum": ["sha256"],
+          "description": "Algorithm used for all artifact checksums. Always sha256 for Week 2."
+        },
+        "packages": { "type": "object" },
+        "runtime": { "type": "object" },
+        "builtAgainst": { "type": "object" },
+        "contentType": { "type": "string" },
+        "omics": { "type": "string" },
+        "figcodeCardId": { "type": "string" },
+        "figcodeCardIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "optional": { "type": "boolean" },
+        "changelog": { "type": "string" },
+        "status": { "type": "string", "enum": ["canonical", "incubating", "deprecated"] }
+      },
+      "allOf": [
+        {
+          "description": "kind=runtime must declare language in {r, python}",
+          "if": { "properties": { "kind": { "const": "runtime" } } },
+          "then": {
+            "required": ["language"],
+            "properties": {
+              "language": { "enum": ["r", "python"] }
+            }
+          }
+        },
+        {
+          "description": "Artifact url host must match the platformId key (e.g. artifacts['macos-arm64'].url must end with macos-arm64)",
+          "if": {
+            "properties": {
+              "artifacts": {
+                "type": "object",
+                "minProperties": 1
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "artifacts": {
+                "type": "object",
+                "additionalProperties": {
+                  "if": {
+                    "properties": {
+                      "url": { "type": "string" }
+                    }
+                  },
+                  "then": {
+                    "description": "url pattern is checked by code (selectArtifact), schema only checks url is a string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "go-kegg",
+  "pluginVersion": "1.0.0",
+  "descriptorVersion": 1,
+  "sourceScriptSha256": "517e86b6fed5af13aa8da8eca95cab70cfc73c3469aa8129a2f28fe58a4464ed",
+  "inputBindingDigest": "1fc4230b58a465603fb87294737b6a0a18204648fa890a23664959e4762563e1",
+  "artifactContractDigest": "20c0e179c7e6945ab6da72573fc53ddff7f21fb8545e33a99c5515dae4e63322",
+  "revisionSourceStrategy": "execution_snapshot_per_artifact",
+  "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
+  "fixtureInput": "demo-data/genes.csv",
+  "expectedArtifactIds": ["go_bp_results", "kegg_results", "go_bp_dotplot", "kegg_dotplot", "report"]
+}

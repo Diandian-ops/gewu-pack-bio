@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "celltypist",
+  "pluginVersion": "1.0.0",
+  "platforms": ["macos-arm64", "windows-x64"],
+  "fixtures": [
+    {
+      "id": "valid",
+      "description": "PBMC 3k-like h5ad fixture (270 cells × 100 genes, 3 simulated cell types), default celltypist params — scans h5ad and attempts celltypist.annotate; if Model unavailable, falls back to scanpy-based deterministic annotation (fallback_used=1). Either way produces 8 outputs.",
+      "inputs": {
+        "anndata_file": "demo-data/pbmc_3k_mini.h5ad",
+        "majority_voting": true,
+        "over_clustering": "leiden",
+        "min_genes": 50,
+        "min_cells": 3,
+        "p_thres": 0.5,
+        "mode": "best match",
+        "min_prop": 0.0
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": [
+        "predictions.csv",
+        "probabilities.csv",
+        "confusion_matrix.csv",
+        "annotated.h5ad",
+        "umap_annotation.png",
+        "umap_confidence.png",
+        "report.html",
+        "manifest.json"
+      ]
+    },
+    {
+      "id": "missing-inputs",
+      "description": "No h5ad file in jobDir — preflight fails fast with exit code 3",
+      "inputs": {},
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "missing_required_file_inputs"
+    },
+    {
+      "id": "runtime-not-ready",
+      "description": "biof3-py-runtime without celltypist installed (celltypist ImportError) — preflight detects missing celltypist and exits 4. Only valid when celltypist is not available.",
+      "inputs": {
+        "anndata_file": "demo-data/pbmc_3k_mini.h5ad"
+      },
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "runtime_not_ready",
+      "skipOnSupportedPlatform": true
+    },
+    {
+      "id": "empty-result",
+      "description": "Tiny AnnData (< 10 obs after QC) — script returns exit code 5 with placeholder PNG + empty predictions.csv, in line with scientific empty-result semantics.",
+      "inputs": {
+        "anndata_file": "demo-data/pbmc_3k_mini.h5ad",
+        "min_genes": 5000,
+        "min_cells": 50
+      },
+      "expectedStatus": "valid",
+      "expectedFailureMode": "empty_result"
+    }
+  ],
+  "reproducibility": {
+    "requireScriptSha256": true,
+    "requireParamsHash": true,
+    "requireInputSha256": true,
+    "requireOutputSha256": true,
+    "requirePythonVersion": true,
+    "requirePackageVersions": true,
+    "evidenceSource": "runtime-generated artifact-manifest.json + provenance.json"
+  }
+}

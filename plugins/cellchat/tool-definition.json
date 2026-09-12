@@ -1,0 +1,193 @@
+{
+  "id": "cellchat",
+  "title": "CellChat 细胞通讯推断",
+  "subtitle": "细胞-细胞通讯（配体-受体）概率与通路富集",
+  "category": "single-cell",
+  "language": "r",
+  "description": "对 Seurat 单细胞对象执行 CellChat 1.6+ 细胞通讯推断：构建 CellChatDB（human/mouse）、computeCommunProb（通讯概率）、computeCommunProbPathway（通路级通讯）、aggregateNet、identifyCommunicationPatterns（pattern recognition），输出通讯数量热图、弦图、通路气泡图、信号通路富集表。",
+  "inputs": [
+    {
+      "id": "seurat_rds",
+      "label": "Seurat 对象 RDS 文件",
+      "type": "file",
+      "required": true,
+      "accept": ".rds",
+      "hint": "上游 scanpy-advanced / seurat / scanpy-cluster 产出的 Seurat 对象 RDS（必须含 meta.data 中的 cell_type 列与归一化表达 data layer）。"
+    },
+    {
+      "id": "cell_type_col",
+      "label": "细胞类型注释列名",
+      "type": "text",
+      "default": "cell_type",
+      "hint": "meta.data 中的 cell_type / celltype / cluster_label 列名；用于通讯概率 cell group。"
+    },
+    {
+      "id": "species",
+      "label": "物种",
+      "type": "select",
+      "default": "human",
+      "options": ["human", "mouse", "zebrafish"],
+      "hint": "CellChatDB 选择：CellChatDB.human / CellChatDB.mouse / CellChatDB.zebrafish。"
+    },
+    {
+      "id": "db_category",
+      "label": "CellChatDB 分类",
+      "type": "select",
+      "default": "Secreted Signaling",
+      "options": ["Secreted Signaling", "Cell-Cell Contact", "ECM-Receptor", "Non-protein Signaling"],
+      "hint": "Subset DB by category；空则保留全部。"
+    },
+    {
+      "id": "min_cells",
+      "label": "每组最少细胞数",
+      "type": "number",
+      "default": 10,
+      "minimum": 1,
+      "required": false
+    },
+    {
+      "id": "pvalue_threshold",
+      "label": "通讯推断 p-value 阈值",
+      "type": "number",
+      "default": 0.05,
+      "minimum": 0,
+      "maximum": 1
+    },
+    {
+      "id": "n_patterns",
+      "label": "通讯模式（outgoing/incoming）数量",
+      "type": "number",
+      "default": 5,
+      "minimum": 2,
+      "maximum": 10,
+      "required": false,
+      "hint": "NMF 推断的 outgoing / incoming pattern 数量。"
+    },
+    {
+      "id": "compute_hierarchy",
+      "label": "层级推断（hierarchical）",
+      "type": "select",
+      "default": "false",
+      "options": ["false", "true"],
+      "hint": "是否执行 selectK + identifyCommunicationPatterns + netAnalysis_signalingRole。"
+    }
+  ],
+  "outputs": [
+    { "id": "communications_table", "filename": "communications_table.csv", "type": "table", "label": "通讯结果表（LR pair × cell group）" },
+    { "id": "pathway_enrichment", "filename": "pathway_enrichment.csv", "type": "table", "label": "通路富集表" },
+    { "id": "interaction_heatmap", "filename": "interaction_heatmap.png", "type": "plot", "label": "细胞组间通讯数量热图" },
+    { "id": "chord_diagram", "filename": "chord_diagram.png", "type": "plot", "label": "弦图（cell-cell LR edges）" },
+    { "id": "bubble_plot", "filename": "bubble_plot.png", "type": "plot", "label": "通路气泡图" },
+    { "id": "cellchat_object", "filename": "cellchat_object.rds", "type": "data", "label": "CellChat 对象 RDS（下游 netAnalysis_* 复用）" },
+    { "id": "report", "filename": "report.html", "type": "report", "label": "解读报告" },
+    { "id": "manifest", "filename": "manifest.json", "type": "manifest", "label": "Job manifest" }
+  ],
+  "tutorialUrl": "/docs/single-cell/cellchat",
+  "demoDataUrl": "/demo-data/cellchat-demo",
+  "estimatedMinutes": 5,
+  "packages": ["Seurat", "CellChat", "ggplot2", "ComplexHeatmap", "circlize", "igraph", "NMF"],
+  "color": "#16a34a",
+  "reportUrl": "/exports/tools/cellchat/index.html",
+  "ipcChannel": "tools:invoke/cellchat",
+  "diagnostics": {
+    "stdout": "cellchat > 进度通过 progress.json 驱动",
+    "stderr": "preflight 失败 → exit 3 (missing-inputs); runtime 缺包 → exit 4 (runtime-not-ready); empty-result → exit 5",
+    "exitCodeMap": {
+      "0": "valid",
+      "3": "missing_required_file_inputs",
+      "4": "runtime_not_ready",
+      "5": "empty_result_or_insufficient_signal"
+    }
+  },
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少 Seurat RDS 输入",
+      "description": "job 目录未发现合法的 .rds (>1KB) Seurat 对象；上游应为 scanpy-advanced / seurat 链式产物。",
+      "recoverable": true,
+      "suggestedFix": "确认 seurat_rds input 已绑定且文件 >1KB；或先跑 scanpy-advanced / seurat 产出 Seurat 对象 RDS。",
+      "detect": "未找到 rds 文件 \\| seurat_rds missing \\| 缺少 rds"
+    },
+    {
+      "code": "runtime_not_ready",
+      "title": "R 运行时缺包（CellChat / igraph / ComplexHeatmap / NMF）",
+      "description": "biof3-r-runtime 未装 CellChat 或其依赖（igraph / ComplexHeatmap / circlize / NMF / ggalluvial）；脚本会 fail-fast 并给出 install 指引。",
+      "recoverable": true,
+      "suggestedFix": "执行 install.json 中的 BiocManager::install('CellChat') 一次性补齐；或在 biof3-r-runtime 路径前缀下运行 install.sh。CellChat 安装体积较大（~120MB 含数据库），按需在 r-spatial bundle 内预置。",
+      "detect": "there is no package called .CellChat. \\| ImportError .* CellChat \\| biocLite \\| ModuleNotFoundError"
+    },
+    {
+      "code": "empty_result_or_insufficient_signal",
+      "title": "通讯结果为空（无显著 LR 对）",
+      "description": "在当前 pvalue_threshold / min_cells 阈值下没有显著 LR 对；属空结果（empty-result），脚本仍落盘 CellChat object + placeholder PNG。",
+      "recoverable": true,
+      "suggestedFix": "放宽 pvalue_threshold（默认 0.05 → 0.1）或降低 min_cells；或换更大数据集；该结果不算 failed 任务。",
+      "detect": "no significant communication \\| 0 LR pair \\| insufficient signal"
+    }
+  ],
+  "resultStudio": {
+    "contractVersion": 1,
+    "descriptorVersion": 1,
+    "semanticType": "cell_cell_communication",
+    "entity": {
+      "type": "lr_interaction",
+      "idField": "interaction_id",
+      "fields": {
+        "interaction_id": "string",
+        "ligand": "string",
+        "receptor": "string",
+        "pathway": "string",
+        "source_group": "string",
+        "target_group": "string",
+        "prob": "number",
+        "pvalue": "number"
+      }
+    },
+    "source": {
+      "strategy": "execution_snapshot_per_artifact",
+      "entryPoint": "scripts/cellchat.R"
+    },
+    "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
+    "inputBindings": [
+      {
+        "inputId": "seurat_rds",
+        "required": true,
+        "acceptsArtifactTypes": ["data"],
+        "semanticRole": "single_cell_seurat_object"
+      }
+    ],
+    "parameters": {
+      "cell_type_col": { "type": "text", "default": "cell_type" },
+      "species": { "type": "select", "default": "human", "options": ["human", "mouse", "zebrafish"] },
+      "db_category": { "type": "select", "default": "Secreted Signaling", "options": ["Secreted Signaling", "Cell-Cell Contact", "ECM-Receptor", "Non-protein Signaling"] },
+      "min_cells": { "type": "number", "default": 10, "minimum": 1 },
+      "pvalue_threshold": { "type": "number", "default": 0.05, "minimum": 0, "maximum": 1 },
+      "n_patterns": { "type": "number", "default": 5, "minimum": 2, "maximum": 10 },
+      "compute_hierarchy": { "type": "select", "default": "false", "options": ["false", "true"] }
+    },
+    "parameterImpacts": {
+      "cell_type_col": "workflow",
+      "species": "workflow",
+      "db_category": "scientific",
+      "min_cells": "scientific",
+      "pvalue_threshold": "scientific",
+      "n_patterns": "scientific",
+      "compute_hierarchy": "workflow"
+    },
+    "actions": ["select_pathway", "select_lr_pair", "recompute", "change_species"],
+    "artifacts": [
+      { "id": "communications_table", "type": "table", "filename": "communications_table.csv", "interaction": "interactive" },
+      { "id": "pathway_enrichment", "type": "table", "filename": "pathway_enrichment.csv", "interaction": "interactive" },
+      { "id": "interaction_heatmap", "type": "plot", "filename": "interaction_heatmap.png", "interaction": "interactive" },
+      { "id": "bubble_plot", "type": "plot", "filename": "bubble_plot.png", "interaction": "interactive" },
+      { "id": "cellchat_object", "type": "data", "filename": "cellchat_object.rds", "interaction": "interactive" },
+      { "id": "report", "type": "report", "filename": "report.html", "interaction": "noninteractive" }
+    ],
+    "interactionMappings": [
+      { "artifactId": "communications_table", "mode": "table", "entityType": "lr_interaction", "idField": "interaction_id" },
+      { "artifactId": "pathway_enrichment", "mode": "table", "entityType": "pathway", "idField": "pathway" },
+      { "artifactId": "interaction_heatmap", "mode": "heatmap", "dataArtifactId": "communications_table", "entityType": "cell_group_pair" },
+      { "artifactId": "bubble_plot", "mode": "scatter", "dataArtifactId": "pathway_enrichment", "entityType": "pathway", "xField": "pathway", "yField": "pvalue", "yTransform": "neg_log10" }
+    ]
+  }
+}

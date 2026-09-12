@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SHAP 可解释性 - 结果解读报告 | BioF3</title>
+  <style>
+  :root { --text: #17201d; --muted: #5c6b64; --border: #dfe8e3; --surface: #f8faf9; --primary: #2e8555; --code-bg: #f4f7f5; --warn: #d97706; --info: #2563eb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: var(--text); font: 14px/1.72 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif; }
+  .report { max-width: 860px; padding: 40px 32px 60px; margin: 0 auto; margin-left: max(200px, calc(50% - 330px)); }
+  .report.full { margin-left: auto; margin-right: auto; }
+  .report-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 32px; position: relative; }
+  .report-header .eyebrow { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; }
+  .report-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .report-header .meta { font-size: 12px; color: var(--muted); }
+  h2 { font-size: 18px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; }
+  p { margin: 0 0 12px; } ul, ol { margin: 0 0 12px; padding-left: 22px; } li { margin-bottom: 4px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 6px; overflow-x: auto; margin: 0 0 16px; font-size: 13px; line-height: 1.5; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 13px; }
+  th, td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
+  th { background: var(--surface); font-weight: 600; }
+  .callout { padding: 14px 16px; border-radius: 6px; margin: 16px 0; font-size: 13px; }
+  .callout-info { background: #eff6ff; border-left: 3px solid var(--info); }
+  .callout-warn { background: #fffbeb; border-left: 3px solid var(--warn); }
+  .callout-tip { background: #ecfdf5; border-left: 3px solid var(--primary); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .fig { margin: 20px 0; text-align: center; }
+  .fig img { max-width: 55%; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.1); cursor: zoom-in; transition: transform .3s; } .fig img.zoomed { max-width: 100%; cursor: zoom-out; }
+  .fig-caption { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card .value { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .biof3-wm { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27200%27%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2728%27 font-weight=%27800%27 fill=%27%232e8555%27 opacity=%270.04%27 transform=%27rotate(-25 150 100)%27%3EBioF3%3C/text%3E%3Ctext x=%2750%25%27 y=%2770%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2710%27 font-weight=%27700%27 fill=%27%232e8555%27 opacity=%270.035%27 transform=%27rotate(-25 150 100)%27%3ESHENGXIN F3%3C/text%3E%3C/svg%3E"); }
+  .nav-wrap { position: fixed; left: 0; top: 0; bottom: 0; width: 200px; background: #f8faf9; border-right: 1px solid #dfe8e3; padding: 20px 12px; overflow-y: auto; font-size: 12px; z-index: 50; transition: transform .2s; box-shadow: 2px 0 8px rgba(0,0,0,.06); }
+  .nav-wrap.hidden { transform: translateX(-100%); box-shadow: none; }
+  .nav-toggle { position: fixed; left: 8px; top: 8px; z-index: 60; background: #fff; border: 1px solid #dfe8e3; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .nav-wrap .nav-title { font-weight: 700; font-size: 13px; margin-bottom: 12px; color: #2e8555; }
+  .nav-wrap a { display: block; padding: 4px 0; color: #5c6b64; text-decoration: none; line-height: 1.4; }
+  .nav-wrap a:hover { color: #2e8555; }
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<button class="nav-toggle" onclick="var n=document.querySelector('.nav-wrap'),r=document.querySelector('.report');n.classList.toggle('hidden');r.classList.toggle('full');this.textContent=n.classList.contains('hidden')?'☰':'✕'" title="切换目录">☰</button>
+<div class="biof3-wm" aria-hidden="true"></div>
+<nav class="nav-wrap" id="reportNav"><div class="nav-title">目录</div></nav>
+
+<div class="report">
+
+<header class="report-header">
+  <div class="eyebrow">BioF3 分析工具 · 结果解读报告</div>
+  <h1>SHAP 可解释性分析</h1>
+  <p class="meta">工具版本：iml (Kernel SHAP) · 报告模板 v1.0 · 生成于 BioF3 在线分析平台</p>
+</header>
+
+<!-- ============================================================ -->
+<h2>一、分析概览</h2>
+
+<p>本报告对上游 ML 分类器（ml-classifier）训练好的模型进行 SHAP 可解释性分析。SHAP（SHapley Additive exPlanations）基于博弈论的 Shapley 值，为每个样本的每个特征分配一个贡献值，既能解释全局特征重要性，又能解释单样本决策逻辑，是当前最严谨的模型解释方法。</p>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="value">{{model_type}}</div><div class="label">上游模型类型</div></div>
+  <div class="stat-card"><div class="value">{{n_features}}</div><div class="label">解释特征数</div></div>
+  <div class="stat-card"><div class="value">{{n_samples}}</div><div class="label">解释样本数</div></div>
+  <div class="stat-card"><div class="value">{{top_n}}</div><div class="label">展示 Top N</div></div>
+</div>
+
+<div class="callout callout-info">
+  <strong>SHAP vs 传统特征重要性</strong>
+  <ul style="margin:0;padding-left:18px;">
+    <li><strong>传统重要性</strong>（RF Gini / XGBoost Gain）：模型内在指标，无法分解到单样本</li>
+    <li><strong>SHAP</strong>：基于 Shapley 值，每个样本的每个特征都有贡献值，局部+全局统一</li>
+    <li><strong>本工具用 Kernel SHAP</strong>（iml 包）：模型无关方法，通用但比 TreeSHAP 慢</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2>二、全局 SHAP 重要性</h2>
+
+<div class="fig">
+  <img src="{{global_importance.png}}" alt="Global SHAP Importance">
+  <div class="fig-caption">图 1：全局 SHAP 特征重要性。按所有样本 SHAP 绝对值均值排序，反映每个特征对模型预测的整体贡献。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>排名靠前的特征 -> 对模型决策贡献最大</li>
+  <li>SHAP 值是 <em>方向性</em> 的（正/负），而 Gini/Gain 只有大小</li>
+  <li>与 ml-classifier 的特征重要性对比：若排序一致 -> 特征重要性稳健；若不一致 -> SHAP 更可信</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>三、SHAP Beeswarm 图</h2>
+
+<div class="fig">
+  <img src="{{beeswarm.png}}" alt="SHAP Beeswarm">
+  <div class="fig-caption">图 2：SHAP Beeswarm 图。每行一个特征，每个点代表一个样本。横轴=SHAP 值（正=推向正类，负=推向负类），颜色=特征值高低（红高蓝低）。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>红色点分布在右侧 -> 该特征值高时推向正类预测</li>
+  <li>红色点分布在左侧 -> 该特征值高时推向负类预测（保护因子）</li>
+  <li>点的横向散布宽 -> 该特征对不同样本影响差异大</li>
+  <li>点都集中在 0 附近 -> 该特征对预测几乎无影响</li>
+  <li>这是 SHAP 最核心的可视化，能同时看到重要性、方向和分布</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>四、单样本 Force Plot</h2>
+
+<div class="fig">
+  <img src="{{force_plot.png}}" alt="SHAP Force Plot">
+  <div class="fig-caption">图 3：单样本 SHAP Force Plot。展示某一样本从基线（base value）到预测值的过程中，各特征如何推动预测向正类或负类。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>红色（向右）= 推向正类预测的特征</li>
+  <li>蓝色（向左）= 推向负类预测的特征</li>
+  <li>条形长度 = 该特征对本次预测的贡献大小</li>
+  <li>最终预测值 = 基线 + 所有 SHAP 值之和</li>
+  <li>用于解释"模型为什么把这个样本预测为正/负类"</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>五、Dependence Plot</h2>
+
+<div class="fig">
+  <img src="{{dependence_plot.png}}" alt="SHAP Dependence">
+  <div class="fig-caption">图 4：Top N 特征的 SHAP Dependence Plot。横轴=特征值，纵轴=SHAP 值，揭示特征值与模型预测间的非线性关系。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>正相关趋势 -> 特征值升高推向正类</li>
+  <li>负相关趋势 -> 特征值升高推向负类</li>
+  <li>非单调曲线 -> 存在阈值效应或非线性交互</li>
+  <li>颜色散点 -> 隐含与另一特征的交互作用</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>六、输出数据文件</h2>
+
+<table>
+  <thead><tr><th>文件名</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><code>shap_values.csv</code></td><td>每个样本每个特征的 SHAP 值矩阵</td></tr>
+    <tr><td><code>shap_summary.csv</code></td><td>全局 SHAP 重要性汇总表（均值 / 绝对值均值 / 方差）</td></tr>
+    <tr><td><code>global_importance.png / .pdf</code></td><td>全局重要性图（双格式）</td></tr>
+    <tr><td><code>beeswarm.png / .pdf</code></td><td>Beeswarm 图（双格式）</td></tr>
+    <tr><td><code>force_plot.png / .pdf</code></td><td>单样本 Force Plot（双格式）</td></tr>
+    <tr><td><code>dependence_plot.png / .pdf</code></td><td>Dependence Plot（双格式）</td></tr>
+    <tr><td><code>summary.txt</code></td><td>分析摘要</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2>七、方法学说明（可用于论文 Methods）</h2>
+
+<pre>
+SHAP (SHapley Additive exPlanations) values were computed
+using the iml package in R, which implements model-agnostic
+Kernel SHAP. The upstream classifier (trained via the
+ml-classifier tool) was passed as the prediction function.
+Global feature importance was computed as the mean absolute
+SHAP value across all samples. Local explanations were
+visualized as force plots for individual samples. Dependence
+plots were generated for the top N features to reveal
+non-linear effects and interactions.
+</pre>
+
+<!-- ============================================================ -->
+<h2>八、参考资料</h2>
+
+<ul>
+  <li>Lundberg SM, Lee SI. A Unified Approach to Interpreting Model Predictions. <em>NeurIPS</em>. 2017.</li>
+  <li>Molnar C. Interpretable Machine Learning. 2nd ed. 2022. <a href="https://christophm.github.io/interpretable-ml-book/">在线版</a></li>
+  <li>Casalicchio G, et al. Visualizing the Feature Importance for Black Box Models. <em>ECML PKDD</em>. 2018.</li>
+  <li><a href="https://biof3.com/docs/ml/module04">BioF3 教程：模型可解释性</a></li>
+</ul>
+
+<div class="footer">
+  <p>本报告由 BioF3 在线分析平台自动生成，仅供学习参考。如需用于正式发表，请结合实际数据和实验设计进行调整。</p>
+  <p>BioF3 - AI 陪伴的全组学学习与实战平台 · <a href="https://biof3.com">biof3.com</a></p>
+</div>
+
+</div><!-- /.report -->
+<script>document.querySelectorAll(".fig img").forEach(function(img){img.addEventListener("click",function(){this.classList.toggle("zoomed")})});var nav=document.getElementById("reportNav");if(nav){document.querySelectorAll(".report h2").forEach(function(h,i){h.id=h.id||"s"+i;var a=document.createElement("a");a.href="#"+h.id;a.textContent=h.textContent;nav.appendChild(a)});}</script>
+</body>
+</html>

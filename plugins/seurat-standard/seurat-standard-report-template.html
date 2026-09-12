@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seurat 单细胞标准流程 — 结果解读报告 | BioF3</title>
+  <style>
+  /* ============================================================
+     BioF3 报告通用样式 v1.0（共享自 seurat-standard 现有模板）
+     ============================================================ */
+  :root { --text: #17201d; --muted: #5c6b64; --border: #dfe8e3; --surface: #f8faf9; --primary: #7c3aed; --code-bg: #f4f7f5; --warn: #d97706; --info: #2563eb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: var(--text); font: 14px/1.72 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif; }
+  .report { max-width: 860px; padding: 40px 32px 60px; margin: 0 auto; }
+  .report-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 32px; position: relative; }
+  .report-header .eyebrow { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; }
+  .report-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .report-header .meta { font-size: 12px; color: var(--muted); }
+  h2 { font-size: 18px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; }
+  p { margin: 0 0 12px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 6px; overflow-x: auto; margin: 0 0 16px; font-size: 13px; line-height: 1.5; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 13px; }
+  th, td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
+  th { background: var(--surface); font-weight: 600; }
+  .callout { padding: 14px 16px; border-radius: 6px; margin: 16px 0; font-size: 13px; }
+  .callout-info { background: #eff6ff; border-left: 3px solid var(--info); }
+  .callout-warn { background: #fffbeb; border-left: 3px solid var(--warn); }
+  .callout-tip  { background: #f5f3ff; border-left: 3px solid var(--primary); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .fig { margin: 20px 0; text-align: center; }
+  .fig img { max-width: 80%; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+  .fig-caption { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card .value { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<div class="report">
+
+<header class="report-header">
+  <div class="eyebrow">BioF3 分析工具 · 结果解读报告</div>
+  <h1>Seurat 单细胞标准流程</h1>
+  <p class="meta">工具版本：Seurat v5 · 报告模板 v1.0 · 生成于 BioF3 在线分析平台</p>
+</header>
+
+<!-- ★ 第一节：分析概览 ——————————————————————— -->
+<h2>一、分析概览</h2>
+
+<p>本工具按 <a href="https://satijalab.org/seurat/articles/pbmc3k_tutorial.html">Seurat 官方 PBMC 3k tutorial</a> 标准流程，对单细胞 RNA-seq 数据完成质控、降维、聚类与 marker 鉴定。所有可调参数的默认值均跟随官方教程。</p>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="value">{{cells_input}}</div><div class="label">起始细胞数</div></div>
+  <div class="stat-card"><div class="value">{{cells_after_qc}}</div><div class="label">QC 后细胞数</div></div>
+  <div class="stat-card"><div class="value">{{n_genes}}</div><div class="label">基因数</div></div>
+  <div class="stat-card"><div class="value">{{n_variable}}</div><div class="label">高变基因数</div></div>
+  <div class="stat-card"><div class="value">{{n_clusters}}</div><div class="label">细胞 cluster 数</div></div>
+  <div class="stat-card"><div class="value">{{n_markers}}</div><div class="label">Marker 总数</div></div>
+</div>
+
+<div class="callout callout-info">
+  <strong>关键参数</strong>
+  物种 = {{species}} · PCA dims = 1:{{dims_used}} · 聚类 resolution = {{resolution}} · 高变基因数 = {{n_variable}}
+</div>
+
+<div class="callout callout-tip">
+  <strong>本工具不做什么</strong>
+  整合（Integration / Harmony / RPCA）、SCTransform、空间组学、轨迹分析（pseudotime / RNA velocity）、自动细胞类型注释、doublet 检测。这些功能留给后续专门工具。
+</div>
+
+<!-- ★ 第二节：质控 ——————————————————————— -->
+<h2>二、质控（QC）</h2>
+
+<p>按官方 PBMC 3k tutorial 标准对每个细胞计算三项指标：基因数 (<code>nFeature_RNA</code>)、UMI 总数 (<code>nCount_RNA</code>) 和线粒体基因比例 (<code>percent.mt</code>)。</p>
+
+<div class="fig">
+  <img src="{{qc_violin.png}}" alt="QC 三联小提琴图">
+  <div class="fig-caption">图 1：每个细胞的三项 QC 指标分布。检查左右两端的离群细胞。</div>
+</div>
+
+<div class="fig">
+  <img src="{{qc_scatter.png}}" alt="QC scatter">
+  <div class="fig-caption">图 2：UMI 数 vs 线粒体比例 / nFeature 的散点图。线性相关性反映数据质量。</div>
+</div>
+
+<!-- ★ 第三节：高变基因 ——————————————————————— -->
+<h2>三、高变基因（HVG）</h2>
+
+<p>使用 <code>FindVariableFeatures(selection.method="vst", nfeatures={{n_variable}})</code> 选取前 N 个高变基因作为后续降维的输入。下方图标记 top 10 高变基因。</p>
+
+<div class="fig">
+  <img src="{{hvg_plot.png}}" alt="HVG">
+  <div class="fig-caption">图 3：vst 方法挑出的高变基因（红色），前 10 个标记基因名。</div>
+</div>
+
+<!-- ★ 第四节：降维与聚类 ——————————————————————— -->
+<h2>四、降维与聚类</h2>
+
+<p>对所有高变基因执行 PCA，选取前 {{dims_used}} 个主成分构建 k-NN 图，再以 resolution = {{resolution}} 进行 Louvain 聚类，最后用 UMAP 可视化。</p>
+
+<div class="fig">
+  <img src="{{pca_dimplot.png}}" alt="PCA DimPlot">
+  <div class="fig-caption">图 4：PCA 二维投影（未着色）。</div>
+</div>
+
+<div class="fig">
+  <img src="{{elbow_plot.png}}" alt="ElbowPlot">
+  <div class="fig-caption">图 5：ElbowPlot，辅助判断保留多少个 PC。本工具默认 1:{{dims_used}}。</div>
+</div>
+
+<div class="fig">
+  <img src="{{pca_dim_loadings.png}}" alt="PCA Loadings">
+  <div class="fig-caption">图 6：PC1 / PC2 top loading 基因。</div>
+</div>
+
+<div class="fig">
+  <img src="{{umap_clusters.png}}" alt="UMAP">
+  <div class="fig-caption">图 7：UMAP 按 seurat_cluster 着色，共 {{n_clusters}} 个 cluster。</div>
+</div>
+
+<!-- ★ 第五节：Marker 基因 ——————————————————————— -->
+<h2>五、Marker 基因</h2>
+
+<p>对每个 cluster 跑 <code>FindAllMarkers(only.pos=TRUE)</code>，选出 top N marker 用于 heatmap、violin、feature 可视化。</p>
+
+<div class="fig">
+  <img src="{{markers_heatmap.png}}" alt="Marker Heatmap">
+  <div class="fig-caption">图 8：每个 cluster top marker DoHeatmap。</div>
+</div>
+
+<div class="fig">
+  <img src="{{markers_violin.png}}" alt="Marker Violin">
+  <div class="fig-caption">图 9：top 6 marker 跨 cluster VlnPlot。</div>
+</div>
+
+<div class="fig">
+  <img src="{{feature_plot.png}}" alt="Feature Plot">
+  <div class="fig-caption">图 10：top 6 marker 在 UMAP 上的 FeaturePlot。</div>
+</div>
+
+<!-- ★ 解读 ——————————————————————— -->
+<h2>六、解读与下一步</h2>
+
+<p>当前结果（{{n_clusters}} 个 cluster / {{n_markers}} 个 positive marker）已可作为后续细胞类型注释工具（SingleR / celltypist）、轨迹分析（monocle3）、通讯分析（CellChat）等的输入。</p>
+
+<div class="callout callout-warn">
+  <strong>复现建议</strong>
+  <code>seurat_obj.rds</code> 已落盘到 <code>output/seurat_obj.rds</code>，可直接 <code>readRDS()</code> 加载用于后续二次分析；也可在 Result Studio 看板内启用「rerun_clustering」/「change_resolution」等交互式动作快速迭代。
+</div>
+
+<div class="footer">
+  本报告由 BioF3 seurat-standard plugin (v1.0.0) 生成 · 物种：{{species}} · dev Electron 边界内 verified（G0 阶段）· 不外推 packaged / Provider / GA。
+</div>
+
+</div>
+
+</body>
+</html>

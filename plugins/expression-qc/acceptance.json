@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "expression-qc",
+  "pluginVersion": "1.0.0",
+  "platforms": ["macos-arm64"],
+  "fixtures": [
+    {
+      "id": "valid",
+      "description": "6 samples × 14 genes, WT vs KO, includes all-zero and low-expression genes",
+      "inputs": {
+        "counts": "demo-data/demo-counts.csv",
+        "metadata": "demo-data/demo-metadata.csv",
+        "min_count": 10,
+        "min_samples": 2,
+        "transformation": "none"
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": [
+        "qc_summary.json",
+        "gene_filter_statistics.csv",
+        "sample_library_size.csv",
+        "sample_correlation.csv",
+        "sample_correlation.png",
+        "pca_coordinates.csv",
+        "pca.png",
+        "validated_counts.csv",
+        "report.html"
+      ]
+    },
+    {
+      "id": "invalid-non-numeric",
+      "description": "counts contains non-numeric values (abc)",
+      "inputs": {
+        "counts": "demo-data/demo-counts-non-numeric.csv",
+        "min_count": 10,
+        "min_samples": 2
+      },
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "invalid_input"
+    },
+    {
+      "id": "low-expression",
+      "description": "All genes have very low counts — most filtered out",
+      "inputs": {
+        "counts": "demo-data/demo-counts-low-expression.csv",
+        "min_count": 10,
+        "min_samples": 2
+      },
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "invalid_input"
+    },
+    {
+      "id": "missing-inputs",
+      "description": "No counts file provided",
+      "inputs": {},
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "missing_required_file_inputs"
+    }
+  ],
+  "reproducibility": {
+    "requireScriptSha256": true,
+    "requireParamsHash": true,
+    "requireInputSha256": true,
+    "requireOutputSha256": true,
+    "requireRVersion": true,
+    "requirePackageVersions": true
+  }
+}

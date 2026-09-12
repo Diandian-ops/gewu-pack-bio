@@ -1,0 +1,202 @@
+{
+  "id": "celltypist",
+  "title": "CellTypist 细胞类型自动注释",
+  "subtitle": "scRNA-seq 自动 + 手动 cell type annotation (Celltypist ≥1.6 + majority voting)",
+  "category": "single-cell",
+  "language": "python",
+  "description": "对 AnnData (.h5ad) 输入运行 Celltypist 1.6+ 自动细胞类型注释：Model.predict 给出每细胞 best match + 概率 distribution，over_clustering + 多数投票 (majority voting) 在 leiden clusters 层面给出 cluster-level consensus。支持三种 model 来源：(a) 内置预训练模型名 (e.g. Immune_All_Low.pkl) 需联网下载；(b) 用户上传 model .pkl 路径（离线友好）；(c) celltypist 不可用时使用 scanpy-based heuristic fallback（确定性输出 + 标注 fallback_used=1）。输出 8 个文件：predictions.csv / probabilities.csv / confusion_matrix.csv / annotated.h5ad / umap_annotation.png / umap_confidence.png / report.html / manifest.json。",
+  "inputs": [
+    {
+      "id": "anndata_file",
+      "label": "AnnData 输入文件 (.h5ad)",
+      "type": "file",
+      "required": true,
+      "accept": ".h5ad"
+    },
+    {
+      "id": "model",
+      "label": "Celltypist model 路径 (.pkl，可选；不提供则尝试 default Immune_All_Low.pkl)",
+      "type": "string",
+      "required": false,
+      "default": null
+    },
+    {
+      "id": "model_name",
+      "label": "Celltypist 模型名 (e.g. Immune_All_Low.pkl, Adult_COVID19_PBMC.pkl)",
+      "type": "string",
+      "required": false,
+      "default": null
+    },
+    {
+      "id": "majority_voting",
+      "label": "是否启用 majority voting (over_clustering)",
+      "type": "boolean",
+      "default": true,
+      "required": false
+    },
+    {
+      "id": "over_clustering",
+      "label": "over_clustering key (obs 列，默认 leiden)",
+      "type": "string",
+      "default": "leiden",
+      "required": false
+    },
+    {
+      "id": "p_thres",
+      "label": "Probability threshold (multi-label only)",
+      "type": "number",
+      "default": 0.5,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "required": false
+    },
+    {
+      "id": "mode",
+      "label": "Prediction mode",
+      "type": "select",
+      "default": "best match",
+      "options": ["best match", "prob match", "binary"],
+      "required": false
+    },
+    {
+      "id": "min_prop",
+      "label": "Minimum proportion of cells in cluster (majority voting)",
+      "type": "number",
+      "default": 0.0,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "required": false
+    },
+    {
+      "id": "min_genes",
+      "label": "每个细胞至少检出基因数 (QC)",
+      "type": "number",
+      "default": 200,
+      "required": false,
+      "minimum": 1
+    },
+    {
+      "id": "min_cells",
+      "label": "每个基因至少在多少细胞中检出 (QC)",
+      "type": "number",
+      "default": 3,
+      "required": false,
+      "minimum": 1
+    }
+  ],
+  "outputs": [
+    { "id": "predictions", "filename": "predictions.csv", "type": "table", "label": "Celltypist 预测结果 (cell_id, predicted_labels, conf_score, over_clustering, majority_voting)" },
+    { "id": "probabilities", "filename": "probabilities.csv", "type": "table", "label": "Top-N cell type 概率分布" },
+    { "id": "confusion_matrix", "filename": "confusion_matrix.csv", "type": "table", "label": "Confusion matrix (real vs predicted cell_type, 如 obs 含 cell_type 列)" },
+    { "id": "annotated", "filename": "annotated.h5ad", "type": "data", "label": "带 celltypist 注释的 AnnData (obs.predicted_labels / conf_score / majority_voting)" },
+    { "id": "umap_annotation", "filename": "umap_annotation.png", "type": "plot", "label": "UMAP (按 predicted_labels 着色)" },
+    { "id": "umap_confidence", "filename": "umap_confidence.png", "type": "plot", "label": "UMAP (按 conf_score 着色)" },
+    { "id": "report", "filename": "report.html", "type": "report", "label": "Celltypist annotation report" },
+    { "id": "manifest", "filename": "manifest.json", "type": "manifest", "label": "Job manifest (含 stats + 处理回退标记)" }
+  ],
+  "tutorialUrl": "/docs/single-cell/celltypist",
+  "demoDataUrl": "/demo-data/celltypist-demo",
+  "estimatedMinutes": 3,
+  "packages": ["scanpy", "anndata", "pandas", "numpy", "scipy", "matplotlib", "seaborn", "Pillow", "celltypist"],
+  "color": "#a855f7",
+  "reportUrl": "/exports/tools/celltypist/index.html",
+  "ipcChannel": "tools:invoke/celltypist",
+  "diagnostics": {
+    "stdout": "celltypist > 进度通过 progress.json 驱动",
+    "stderr": "preflight 失败 → exit 3 (missing-inputs); runtime 缺包 → exit 4 (runtime-not-ready); empty-result → exit 5 (no predicted labels, 模型与输入不匹配); celltypist 不可用且无 model → exit 0 + fallback_used=1 + 走 scanpy-based heuristic",
+    "exitCodeMap": {
+      "0": "valid",
+      "3": "missing_required_file_inputs",
+      "4": "runtime_not_ready",
+      "5": "empty_result"
+    }
+  },
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少 .h5ad 输入文件",
+      "description": "job 目录未发现合法的 .h5ad (>1KB) 输入；上游应为 scanpy-advanced.outputs.preprocessed.h5ad 或其他 celltypist 链式上游。",
+      "recoverable": true,
+      "suggestedFix": "确认 anndata_file input 已绑定且文件 >1KB；或先跑 scanpy-advanced 链式上游产出。",
+      "detect": "未找到 h5ad 文件 \\| anndata_file missing \\| 缺少 h5ad"
+    },
+    {
+      "code": "runtime_not_ready",
+      "title": "Python 运行时缺包",
+      "description": "biof3-py-runtime 未装 celltypist / scanpy / anndata / matplotlib 等核心包，或 Python 解释器不可达。",
+      "recoverable": true,
+      "suggestedFix": "先运行 install.json 触发 install manager pip install celltypist>=1.6；先安装 biof3-py-runtime 1.0.0+ (含 scanpy>=1.9, anndata>=0.9)。",
+      "detect": "ImportError: No module named celltypist \\| ModuleNotFoundError \\| biof3-py-runtime 缺少依赖"
+    },
+    {
+      "code": "empty_result",
+      "title": "celltypist 注释无结果",
+      "description": "celltypist Model.predict 返回空 predictions（通常因 model 与输入物种/基因不匹配）；属科学空结果 (empty-result)，脚本仍落盘 placeholder PNG + 空 predictions.csv。",
+      "recoverable": true,
+      "suggestedFix": "更换 model_name 或 model 路径（确保 model 与输入物种一致：human vs mouse）；或提供 gene_name 兼容的输入。",
+      "detect": "predictions.is_empty \\| No predicted labels \\| 模型与输入基因.*不匹配"
+    }
+  ],
+  "resultStudio": {
+    "contractVersion": 1,
+    "descriptorVersion": 1,
+    "semanticType": "cell_type_annotation",
+    "entity": {
+      "type": "cell_annotation",
+      "idField": "cell_id",
+      "fields": {
+        "cell_id": "string",
+        "predicted_labels": "string",
+        "conf_score": "number",
+        "majority_voting": "string"
+      }
+    },
+    "source": {
+      "strategy": "execution_snapshot_per_artifact",
+      "entryPoint": "scripts/celltypist.py"
+    },
+    "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.py",
+    "inputBindings": [
+      {
+        "inputId": "anndata_file",
+        "required": true,
+        "acceptsArtifactTypes": ["data"],
+        "semanticRole": "single_cell_expression_matrix"
+      }
+    ],
+    "parameters": {
+      "model": { "type": "string", "default": null },
+      "model_name": { "type": "string", "default": "Immune_All_Low.pkl" },
+      "majority_voting": { "type": "boolean", "default": true },
+      "over_clustering": { "type": "string", "default": "leiden" },
+      "p_thres": { "type": "number", "default": 0.5, "minimum": 0.0, "maximum": 1.0 },
+      "mode": { "type": "select", "default": "best match", "options": ["best match", "prob match", "binary"] },
+      "min_prop": { "type": "number", "default": 0.0, "minimum": 0.0, "maximum": 1.0 },
+      "min_genes": { "type": "number", "default": 200, "minimum": 1 },
+      "min_cells": { "type": "number", "default": 3, "minimum": 1 }
+    },
+    "parameterImpacts": {
+      "model": "scientific",
+      "model_name": "scientific",
+      "majority_voting": "scientific",
+      "over_clustering": "scientific",
+      "p_thres": "scientific",
+      "mode": "scientific",
+      "min_prop": "scientific",
+      "min_genes": "scientific",
+      "min_cells": "scientific"
+    },
+    "actions": ["rerun_annotation", "change_model", "toggle_majority_voting", "recompute"],
+    "artifacts": [
+      { "id": "predictions", "type": "table", "filename": "predictions.csv", "interaction": "interactive" },
+      { "id": "annotated", "type": "data", "filename": "annotated.h5ad", "interaction": "interactive" },
+      { "id": "umap_annotation", "type": "plot", "filename": "umap_annotation.png", "interaction": "interactive" },
+      { "id": "report", "type": "report", "filename": "report.html", "interaction": "noninteractive" }
+    ],
+    "interactionMappings": [
+      { "artifactId": "predictions", "mode": "table", "entityType": "cell", "idField": "cell_id" },
+      { "artifactId": "annotated", "mode": "anndata", "entityType": "cell", "idField": "obs_name" },
+      { "artifactId": "umap_annotation", "mode": "plot", "entityType": "image" }
+    ]
+  }
+}

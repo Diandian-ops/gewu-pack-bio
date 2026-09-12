@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "cellchat",
+  "pluginVersion": "1.0.0",
+  "platforms": ["macos-arm64"],
+  "fixtures": [
+    {
+      "id": "valid",
+      "description": "PBMC 3k-like Seurat RDS fixture (270 cells × 100 HVGs × 3 cell types), default CellChat params — expected all 8 outputs produced (communications_table / pathway_enrichment / interaction_heatmap / chord_diagram / bubble_plot / cellchat_object.rds / report.html / manifest.json)",
+      "inputs": {
+        "seurat_rds": "demo-data/pbmc_3k_mini.rds",
+        "cell_type_col": "cell_type",
+        "species": "human",
+        "db_category": "Secreted Signaling",
+        "min_cells": 5,
+        "pvalue_threshold": 0.05,
+        "n_patterns": 3,
+        "compute_hierarchy": "false"
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": [
+        "communications_table.csv",
+        "pathway_enrichment.csv",
+        "interaction_heatmap.png",
+        "chord_diagram.png",
+        "bubble_plot.png",
+        "cellchat_object.rds",
+        "report.html",
+        "manifest.json"
+      ],
+      "requiresBundle": "r-spatial"
+    },
+    {
+      "id": "missing-inputs",
+      "description": "No Seurat RDS in jobDir — preflight fails fast with exit code 3",
+      "inputs": {},
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "missing_required_file_inputs"
+    },
+    {
+      "id": "runtime-not-ready",
+      "description": "CellChat / igraph / ComplexHeatmap / NMF not installed — should return runtime_not_ready",
+      "inputs": {
+        "seurat_rds": "demo-data/pbmc_3k_mini.rds"
+      },
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "runtime_not_ready",
+      "skipOnSupportedPlatform": true
+    },
+    {
+      "id": "empty-result",
+      "description": "Tiny Seurat object (single cell type) with stringent pvalue — script returns exit code 0 with placeholder PNG + empty communications_table, valid status with empty-result note",
+      "inputs": {
+        "seurat_rds": "demo-data/pbmc_3k_mini.rds",
+        "cell_type_col": "cell_type",
+        "species": "human",
+        "pvalue_threshold": 1e-12,
+        "min_cells": 1000
+      },
+      "expectedStatus": "valid",
+      "expectedFailureMode": "empty_result_or_insufficient_signal"
+    }
+  ],
+  "reproducibility": {
+    "requireScriptSha256": true,
+    "requireParamsHash": true,
+    "requireInputSha256": true,
+    "requireOutputSha256": true,
+    "requireRVersion": true,
+    "requirePackageVersions": true,
+    "evidenceSource": "runtime-generated artifact-manifest.json + provenance.json"
+  }
+}

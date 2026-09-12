@@ -1,0 +1,179 @@
+{
+  "id": "go-kegg",
+  "title": "GO/KEGG 富集分析",
+  "subtitle": "基因功能与通路富集",
+  "category": "bulk RNA-seq",
+  "language": "r",
+  "description": "对基因列表或差异分析结果做 GO（BP/MF/CC）与 KEGG 通路富集（clusterProfiler，离线 KEGG 数据）。",
+  "inputs": [
+    {
+      "id": "deg_table",
+      "label": "基因列表或差异分析结果表 (CSV)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv",
+      "hint": "单列基因名，或含 gene/log2FoldChange/padj 的 DESeq2 结果表（可由差异分析步骤二跳绑定）；后者会自动按显著性拆分上/下调"
+    },
+    {
+      "id": "species",
+      "label": "物种",
+      "type": "select",
+      "default": "human",
+      "options": ["human", "mouse"],
+      "hint": "首期预构建覆盖 human(org.Hs) 与 mouse(org.Mm)，其余物种按需自备"
+    },
+    {
+      "id": "analysis_type",
+      "label": "分析类型",
+      "type": "select",
+      "default": "all",
+      "options": ["all", "GO", "GO-BP", "GO-MF", "GO-CC", "KEGG"]
+    },
+    {
+      "id": "gene_id_type",
+      "label": "基因 ID 类型",
+      "type": "select",
+      "default": "SYMBOL",
+      "options": ["SYMBOL", "ENSEMBL", "ENTREZID", "auto"]
+    },
+    {
+      "id": "enrich_pvalue",
+      "label": "富集 p-value 阈值",
+      "type": "number",
+      "default": 0.05
+    },
+    {
+      "id": "enrich_qvalue",
+      "label": "富集 q-value 阈值",
+      "type": "number",
+      "default": 0.2
+    },
+    {
+      "id": "top_n",
+      "label": "展示 top N 条目",
+      "type": "number",
+      "default": 20
+    },
+    {
+      "id": "padj_cutoff",
+      "label": "差异表 padj 阈值",
+      "type": "number",
+      "default": 0.05,
+      "hint": "仅在输入为 DESeq2 结果表时用于筛选显著基因"
+    },
+    {
+      "id": "lfc_cutoff",
+      "label": "差异表 |log2FC| 阈值",
+      "type": "number",
+      "default": 1,
+      "hint": "仅在输入为 DESeq2 结果表时用于筛选显著基因"
+    }
+  ],
+  "outputs": [
+    { "id": "go_bp_results", "filename": "go_bp_results.csv", "type": "table", "label": "GO-BP 结果表" },
+    { "id": "kegg_results", "filename": "kegg_results.csv", "type": "table", "label": "KEGG 结果表", "required": false },
+    { "id": "go_bp_dotplot", "filename": "go_bp_dotplot.png", "type": "plot", "label": "GO-BP 气泡图" },
+    { "id": "kegg_dotplot", "filename": "kegg_dotplot.png", "type": "plot", "label": "KEGG 气泡图", "required": false },
+    { "id": "report", "filename": "report.html", "type": "report", "label": "解读报告" }
+  ],
+  "tutorialUrl": "/docs/bulk-rnaseq/enrichment",
+  "demoDataUrl": "/demo-data/go-kegg",
+  "estimatedMinutes": 3,
+  "packages": ["clusterProfiler", "enrichplot", "DOSE", "org.Hs.eg.db", "KEGGREST", "png"],
+  "color": "#0891b2",
+  "resultStudio": {
+    "contractVersion": 1,
+    "descriptorVersion": 1,
+    "semanticType": "functional_enrichment",
+    "entity": { "type": "enriched_term", "idField": "term_id", "fields": { "term_id": "string", "description": "string", "gene_ratio": "string", "pvalue": "number", "p_adjust": "number", "gene_ids": "string", "up_gene_count": "number|null", "down_gene_count": "number|null", "direction": "string" } },
+    "source": { "strategy": "execution_snapshot_per_artifact", "entryPoint": "scripts/go-kegg.R" },
+    "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
+    "inputBindings": [{ "inputId": "deg_table", "required": true, "acceptsArtifactTypes": ["table"], "semanticRole": "gene_set_or_differential_expression_table" }],
+    "parameters": {
+      "species": { "type": "select", "default": "human", "options": ["human", "mouse"] },
+      "analysis_type": { "type": "select", "default": "all", "options": ["all", "GO", "GO-BP", "GO-MF", "GO-CC", "KEGG"] },
+      "gene_id_type": { "type": "select", "default": "SYMBOL", "options": ["SYMBOL", "ENSEMBL", "ENTREZID", "auto"] },
+      "enrich_pvalue": { "type": "number", "default": 0.05, "minimum": 0, "maximum": 1 },
+      "enrich_qvalue": { "type": "number", "default": 0.2, "minimum": 0, "maximum": 1 },
+      "top_n": { "type": "number", "default": 20, "minimum": 1 },
+      "padj_cutoff": { "type": "number", "default": 0.05, "minimum": 0, "maximum": 1 },
+      "lfc_cutoff": { "type": "number", "default": 1, "minimum": 0 }
+    },
+    "parameterImpacts": { "species": "workflow", "analysis_type": "workflow", "gene_id_type": "workflow", "enrich_pvalue": "scientific", "enrich_qvalue": "scientific", "top_n": "data", "padj_cutoff": "scientific", "lfc_cutoff": "scientific" },
+    "actions": ["select_terms", "select_genes", "derive_gene_set", "recompute"],
+    "artifacts": [
+      { "id": "go_bp_results", "type": "table", "filename": "go_bp_results.csv", "interaction": "interactive" },
+      { "id": "kegg_results", "type": "table", "filename": "kegg_results.csv", "required": false, "interaction": "interactive" },
+      { "id": "go_bp_dotplot", "type": "plot", "filename": "go_bp_dotplot.png", "interaction": "interactive" },
+      { "id": "kegg_dotplot", "type": "plot", "filename": "kegg_dotplot.png", "required": false, "interaction": "interactive" },
+      { "id": "report", "type": "report", "filename": "report.html", "interaction": "noninteractive" }
+    ],
+    "interactionMappings": [
+      { "artifactId": "go_bp_results", "mode": "table", "entityType": "pathway", "idField": "ID" },
+      { "artifactId": "kegg_results", "mode": "table", "entityType": "pathway", "idField": "ID" },
+      { "artifactId": "go_bp_dotplot", "mode": "scatter", "dataArtifactId": "go_bp_results", "entityType": "pathway", "idField": "ID", "xField": "GeneRatio", "yField": "p.adjust", "yTransform": "neg_log10" },
+      { "artifactId": "kegg_dotplot", "mode": "scatter", "dataArtifactId": "kegg_results", "entityType": "pathway", "idField": "ID", "xField": "GeneRatio", "yField": "p.adjust", "yTransform": "neg_log10" }
+    ],
+    "validator": { "id": "functional_enrichment_result_truth_v1", "checks": ["artifact_truth_valid", "script_sha256", "input_sha256", "output_sha256", "stable_term_id", "empty_result_is_valid", "finite_statistics"] },
+    "goldenFixture": { "path": "golden-revisions/result-studio-v1.json" },
+    "upgradePolicy": { "sameMajor": "compatible_if_contract_digests_match", "contractDrift": "migration_required", "missingMigration": "read_only_legacy" }
+  },
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少必需输入文件",
+      "description": "富集分析需要一个基因列表或差异分析结果表；缺少输入无法继续。",
+      "recoverable": true,
+      "suggestedFix": "让 Harness 从项目中选择上游差异结果（deg_table），或用示例基因列表。",
+      "detect": "missing required file inputs|no input gene file|please provide file"
+    },
+    {
+      "code": "too_few_genes",
+      "title": "基因数不足",
+      "description": "有效基因少于 3 个，无法进行富集分析。",
+      "recoverable": true,
+      "suggestedFix": "放宽上游显著性阈值（padj_cutoff/lfc_cutoff），或检查输入基因列是否正确。",
+      "detect": "too few genes|need >= 3|need at least 3"
+    },
+    {
+      "code": "gene_id_mapping_failed",
+      "title": "基因 ID 映射失败",
+      "description": "gene_id_type 与物种注释库不匹配，bitr 无法把基因名转换为 ENTREZID。",
+      "recoverable": true,
+      "suggestedFix": "切换 gene_id_type（SYMBOL/ENSEMBL/ENTREZID）或设为 auto 自动探测；确认物种选择正确。",
+      "detect": "bitr|fail to map|no gene can be mapped|input gene id|ENTREZID"
+    },
+    {
+      "code": "organism_db_missing",
+      "title": "物种注释库缺失",
+      "description": "所选物种的 OrgDb（如 org.Hs.eg.db / org.Mm.eg.db）未就位。",
+      "recoverable": true,
+      "suggestedFix": "由 Harness 自动准备 r-enrichment 分析包中对应物种的注释库；或改用已支持的物种。",
+      "detect": "org.Hs.eg.db|org.Mm.eg.db|there is no package|OrgDb"
+    },
+    {
+      "code": "kegg_offline_data_missing",
+      "title": "KEGG 离线数据缺失",
+      "description": "KEGG 富集优先使用 bundle 内的 human/mouse 离线快照；快照缺失时回退 KEGG REST。",
+      "recoverable": true,
+      "suggestedFix": "由 Harness 自动补齐 r-enrichment 分析包中的离线 KEGG 快照，或检查 KEGG REST 网络连通性；GO 富集不受影响。",
+      "detect": "offline KEGG snapshot|KEGG REST|KEGG failed"
+    },
+    {
+      "code": "empty_result_or_insufficient_signal",
+      "title": "富集结果为空",
+      "description": "当前阈值下没有显著富集的条目。",
+      "recoverable": true,
+      "suggestedFix": "适度放宽 enrich_pvalue/enrich_qvalue，或确认输入基因集是否具有一致的生物学信号。",
+      "detect": "no term enriched|empty result|0 enriched|no significant"
+    },
+    {
+      "code": "runtime_not_ready",
+      "title": "运行时不可用",
+      "description": "R 运行时或 r-enrichment 分析包未就绪，无法执行富集分析。",
+      "recoverable": true,
+      "suggestedFix": "Harness 将自动准备所需运行时与分析包，完成后继续执行。",
+      "detect": "runtime not ready|r runtime not found|rscript not found"
+    }
+  ]
+}

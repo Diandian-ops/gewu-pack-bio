@@ -1,0 +1,33 @@
+{
+  "id": "gsea",
+  "status": "incubating",
+  "pluginManifestVersion": 1,
+  "title": "GSEA 基因集富集分析",
+  "version": "1.0.0",
+  "language": "r",
+  "description": "Gene Set Enrichment Analysis（GSEA）：基于全基因组排序的基因集富集（clusterProfiler gseGO/gseKEGG/Hallmark），无需预设显著阈值，支持基因排序列表或 DESeq2 差异结果输入。",
+  "requiresBundle": "r-enrichment",
+  "requiresBundleVersion": "1.0.0",
+  "packages": {
+    "r": {
+      "clusterProfiler": ">=4.18.0",
+      "enrichplot": ">=1.30.0",
+      "DOSE": ">=4.4.0",
+      "org.Hs.eg.db": ">=3.22.0",
+      "org.Mm.eg.db": ">=3.22.0",
+      "msigdbr": ">=26.1.0",
+      "KEGGREST": ">=1.50.0",
+      "ggplot2": ">=4.0.0",
+      "jsonlite": ">=1.8.0",
+      "base64enc": ">=0.1-3"
+    }
+  },
+  "runtime": {
+    "r": ">=4.4.0"
+  },
+  "builtAgainst": {
+    "r": "4.5"
+  },
+  "platform": ["macos-arm64"],
+  "supportedPlatforms": ["macos-arm64"]
+}

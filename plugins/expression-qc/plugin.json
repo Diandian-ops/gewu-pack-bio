@@ -1,0 +1,113 @@
+{
+  "id": "expression-qc",
+  "status": "incubating",
+  "title": "表达矩阵质量控制",
+  "subtitle": "counts 矩阵数据质量门，不执行差异表达",
+  "category": "bulk RNA-seq",
+  "language": "r",
+  "version": "1.0.0",
+  "description": "检查表达/counts 矩阵的数据质量：基因×样本方向、非数值列、NA/Inf、负counts、小数counts、重复gene ID、全零基因、低表达基因比例、library size、样本相关性、样本离群、PCA与设计分组关系、metadata对齐状态。只做QC和质量门，不执行差异表达，不自动删除样本。",
+  "dagStep": "qc",
+  "dagPosition": "midstream",
+  "downstream": ["deseq2"],
+  "supportedPlatforms": ["macos-arm64"],
+  "plannedPlatforms": ["macos-x64", "windows-x64", "linux-x64"],
+  "requiresBundle": false,
+  "entryPoint": "scripts/expression-qc.R",
+  "packages": {
+    "r": {
+      "jsonlite": ">=1.8.0",
+      "digest": ">=0.6.0"
+    }
+  },
+  "inputs": [
+    {
+      "id": "counts",
+      "label": "表达/counts 矩阵 (CSV/TSV: gene × sample)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv,.tsv,.txt"
+    },
+    {
+      "id": "metadata",
+      "label": "样本信息表 (可选，来自 sample-metadata-validator)",
+      "type": "file",
+      "required": false,
+      "accept": ".csv,.tsv,.txt"
+    },
+    {
+      "id": "validated_metadata",
+      "label": "上游 validated_metadata Artifact 引用",
+      "type": "text",
+      "required": false,
+      "hint": "sample-metadata-validator 产生的 artifact 引用 ID"
+    },
+    {
+      "id": "min_count",
+      "label": "最低 count 阈值",
+      "type": "number",
+      "default": 10,
+      "hint": "基因在样本中的 count 需 >= 此值才算表达"
+    },
+    {
+      "id": "min_samples",
+      "label": "最少表达样本数",
+      "type": "integer",
+      "default": 2,
+      "hint": "基因至少在 N 个样本中 count >= min_count 才保留"
+    },
+    {
+      "id": "transformation",
+      "label": "转换模式",
+      "type": "text",
+      "default": "none",
+      "hint": "none | log2 (QC 阶段只记录，不强制转换)"
+    }
+  ],
+  "outputs": [
+    { "id": "qc_summary", "type": "json", "label": "QC 摘要", "filename": "qc_summary.json" },
+    { "id": "gene_filter_statistics", "type": "table", "label": "基因过滤统计", "filename": "gene_filter_statistics.csv" },
+    { "id": "sample_library_size", "type": "table", "label": "Library size", "filename": "sample_library_size.csv" },
+    { "id": "sample_correlation", "type": "table", "label": "样本相关性矩阵", "filename": "sample_correlation.csv" },
+    { "id": "sample_correlation_png", "type": "image", "label": "相关性热图", "filename": "sample_correlation.png" },
+    { "id": "pca_coordinates", "type": "table", "label": "PCA 坐标", "filename": "pca_coordinates.csv" },
+    { "id": "pca_png", "type": "image", "label": "PCA 图", "filename": "pca.png" },
+    { "id": "validated_counts", "type": "table", "label": "过滤后 counts", "filename": "validated_counts.csv" },
+    { "id": "report", "type": "report", "label": "QC 报告", "filename": "report.html" }
+  ],
+  "states": ["valid", "warning", "blocked"],
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少必需输入文件",
+      "description": "counts 文件未提供。",
+      "recoverable": true,
+      "suggestedFix": "检查文件路径，或使用示例数据。",
+      "detect": "counts file is required|counts file not found"
+    },
+    {
+      "code": "invalid_input",
+      "title": "输入数据无效",
+      "description": "counts 包含非数值列、NA/Inf、负值或过滤后基因不足。",
+      "recoverable": true,
+      "suggestedFix": "检查 counts 矩阵格式，确保为非负整数。",
+      "detect": "Non-numeric|NA.*Inf|negative values|Insufficient genes"
+    },
+    {
+      "code": "runtime_not_ready",
+      "title": "运行时不可用",
+      "description": "R 运行时或必需包未就绪。",
+      "recoverable": true,
+      "suggestedFix": "确保 R 和 jsonlite/digest 包已安装。",
+      "detect": "runtime not ready|Required R packages.*not available"
+    },
+    {
+      "code": "platform_not_supported",
+      "title": "平台不支持",
+      "description": "当前操作系统不在支持列表内。",
+      "recoverable": false,
+      "suggestedFix": "在 macos-arm64 平台运行。",
+      "detect": "platform not supported|Platform.*not supported"
+    }
+  ]
+}

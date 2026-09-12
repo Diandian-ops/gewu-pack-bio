@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "scanpy-advanced",
+  "pluginVersion": "1.0.0",
+  "platforms": ["macos-arm64", "windows-x64"],
+  "fixtures": [
+    {
+      "id": "valid",
+      "description": "PBMC 3k-like h5ad fixture (270 cells × 100 highly variable genes), default scanpy params — expected all 8 outputs produced",
+      "inputs": {
+        "anndata_file": "demo-data/pbmc_3k_mini.h5ad",
+        "min_genes": 50,
+        "min_cells": 3,
+        "n_top_genes": 100,
+        "n_pcs": 20,
+        "n_neighbors": 10,
+        "resolution": 0.5,
+        "method": "wilcoxon"
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": [
+        "preprocessed.h5ad",
+        "marker_genes.csv",
+        "qc_summary.csv",
+        "umap.png",
+        "umap_clustered.png",
+        "hvg_plot.png",
+        "report.html",
+        "manifest.json"
+      ]
+    },
+    {
+      "id": "missing-inputs",
+      "description": "No h5ad file in jobDir — preflight fails fast with exit code 3",
+      "inputs": {},
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "missing_required_file_inputs"
+    },
+    {
+      "id": "runtime-not-ready",
+      "description": "biof3-py-runtime not provisioned — scanpy ImportError at runtime entry, exit code 4",
+      "inputs": {
+        "anndata_file": "demo-data/pbmc_3k_mini.h5ad"
+      },
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "runtime_not_ready",
+      "skipOnSupportedPlatform": true
+    },
+    {
+      "id": "empty-result",
+      "description": "Tiny AnnData (< 10 obs after QC) — script returns exit code 0 with placeholder PNG + qc_summary, valid status with empty-result note",
+      "inputs": {
+        "anndata_file": "demo-data/pbmc_3k_mini.h5ad",
+        "min_genes": 5000,
+        "min_cells": 50
+      },
+      "expectedStatus": "valid",
+      "expectedFailureMode": "empty_result"
+    }
+  ],
+  "reproducibility": {
+    "requireScriptSha256": true,
+    "requireParamsHash": true,
+    "requireInputSha256": true,
+    "requireOutputSha256": true,
+    "requirePythonVersion": true,
+    "requirePackageVersions": true,
+    "evidenceSource": "runtime-generated artifact-manifest.json + provenance.json"
+  }
+}

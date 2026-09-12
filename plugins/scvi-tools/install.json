@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "scvi-tools",
+  "pluginVersion": "1.0.0",
+  "policy": "install-required",
+  "runtimeBinding": "biof3-py-runtime (extended)",
+  "notes": "scvi-tools 与 torch 不在 biof3-py-runtime 基础栈中（见 PHASE 0 runtime inventory）。本插件声明额外的 PyPI 依赖，通过下方 pip install 步骤在 biof3-py-runtime venv 内部扩展。本文件**不修改 biof3-py-runtime 制品本身**，仅是 plugin 安装时执行；扩展是**幂等**的（已装则跳过）。CPU 模式不引入 GPU 依赖。运行时实测：macOS arm64 + Python 3.11.9 + scvi-tools 1.4.2 + torch 2.13.0 端到端可跑通。",
+  "steps": [
+    {
+      "id": "pip-install-scvi-tools",
+      "kind": "pip-install",
+      "description": "在 biof3-py-runtime venv 内部安装 scvi-tools（带 torch 依赖）",
+      "command": "pip install --quiet scvi-tools torch",
+      "exitOnError": true,
+      "requiresRuntime": "biof3-py-runtime",
+      "estimatedSeconds": 300,
+      "notes": "scvi-tools 1.x 会自动拉取 torch 作为依赖；此步骤仅在 biof3-py-runtime 内部的 venv 执行；幂等；失败触发 runtime-not-ready 失败模式（exit 4）。"
+    }
+  ],
+  "postInstall": {
+    "expectedPackages": {
+      "scvi-tools": ">=1.0",
+      "torch": ">=2.0"
+    },
+    "verifyCommand": "python3 -c 'import scvi, torch; print(scvi.__version__, torch.__version__)'",
+    "skipOnSupportedPlatform": true,
+    "notes": "验证成功后 register 到 installed.json 时打扩展标记 (extended: ['scvi-tools', 'torch'])。"
+  }
+}

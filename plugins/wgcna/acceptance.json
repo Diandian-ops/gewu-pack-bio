@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "wgcna",
+  "pluginVersion": "1.0.0",
+  "platforms": ["macos-arm64"],
+  "fixtures": [
+    {
+      "id": "valid",
+      "description": "Small expression matrix (160 genes × 40 samples) with numeric traits",
+      "inputs": {
+        "expression": "demo-data/expression.csv",
+        "traits": "demo-data/traits.csv",
+        "min_module_size": 20,
+        "merge_cut_height": 0.25,
+        "network_type": "signed"
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": [
+        "sample_dendrogram.png",
+        "soft_threshold.png",
+        "gene_dendrogram.png",
+        "module_trait_heatmap.png",
+        "gs_mm_scatter.png",
+        "module_assignment.csv",
+        "module_trait_corr.csv",
+        "hub_genes.csv",
+        "network.rds",
+        "report.html"
+      ],
+      "requiresBundle": true
+    },
+    {
+      "id": "missing-inputs",
+      "description": "No expression or traits files provided",
+      "inputs": {},
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "missing_required_file_inputs"
+    },
+    {
+      "id": "runtime-not-ready",
+      "description": "WGCNA package not installed",
+      "inputs": {
+        "expression": "demo-data/expression.csv",
+        "traits": "demo-data/traits.csv"
+      },
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "runtime_not_ready",
+      "skipOnSupportedPlatform": true
+    }
+  ],
+  "reproducibility": {
+    "requireScriptSha256": true,
+    "requireParamsHash": true,
+    "requireInputSha256": true,
+    "requireOutputSha256": true,
+    "requireRVersion": true,
+    "requirePackageVersions": true,
+    "evidenceSource": "runtime-generated artifact-manifest.json + provenance.json"
+  }
+}

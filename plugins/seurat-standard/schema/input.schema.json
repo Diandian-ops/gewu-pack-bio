@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "biof3://plugins/seurat-standard/input.schema.json",
+  "title": "seurat-standard input schema",
+  "description": "JSON schema for params.json passed to seurat-standard.R via BioF3 dispatcher. Compatible with biof3-r-runtime Seurat>=5.0.0 + SeuratObject>=5.0.0.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["matrix_file"],
+  "properties": {
+    "matrix_file": {
+      "type": "string",
+      "description": "Path to matrix file (relative to jobDir or absolute). Supports 10X三件套 (matrix.mtx + barcodes.tsv + features.tsv) or single CSV/TSV/MTX/H5."
+    },
+    "species": {
+      "type": "string",
+      "enum": ["human", "mouse"],
+      "default": "human",
+      "description": "species — human uses ^MT-, mouse uses ^mt- for percent.mt pattern."
+    },
+    "min_features": {
+      "type": "integer",
+      "minimum": 50,
+      "maximum": 1000,
+      "default": 200,
+      "description": "CreateSeuratObject(min.features=N) — minimum features per cell."
+    },
+    "max_features": {
+      "type": "integer",
+      "minimum": 500,
+      "maximum": 10000,
+      "default": 2500,
+      "description": "subset(nFeature_RNA < max_features) — upper bound to filter doublets."
+    },
+    "max_mt": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 50,
+      "default": 5,
+      "description": "subset(percent.mt < max_mt) — mitochondrial percentage cutoff (%)."
+    },
+    "nfeatures": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 5000,
+      "default": 2000,
+      "description": "FindVariableFeatures(selection.method='vst', nfeatures=N) — number of HVGs."
+    },
+    "dims": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 50,
+      "default": 10,
+      "description": "FindNeighbors/FindClusters/RunUMAP dims=1:N — PCA dims used."
+    },
+    "resolution": {
+      "type": "number",
+      "minimum": 0.1,
+      "maximum": 2.0,
+      "default": 0.5,
+      "description": "FindClusters(resolution=N) — cluster granularity."
+    },
+    "top_n_markers": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30,
+      "default": 10,
+      "description": "Top N markers per cluster for DoHeatmap / VlnPlot / FeaturePlot."
+    }
+  }
+}

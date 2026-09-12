@@ -1,0 +1,210 @@
+{
+  "id": "scvi-tools",
+  "title": "scvi-tools 深度生成单细胞分析",
+  "subtitle": "scVI 变分推断单细胞分析管线（QC → 训练 SCVI → 隐空间 → 标准化表达 → UMAP）",
+  "category": "single-cell",
+  "language": "python",
+  "description": "对 AnnData (.h5ad) 输入执行 scvi-tools 1.0+ 深度生成模型管线：scvi.model.SCVI 训练 → get_latent_representation → get_normalized_expression → UMAP/cluster。隐空间用作批次整合 + 降维。",
+  "inputs": [
+    {
+      "id": "anndata_file",
+      "label": "AnnData 输入文件 (.h5ad)",
+      "type": "file",
+      "required": true,
+      "accept": ".h5ad"
+    },
+    {
+      "id": "batch_key",
+      "label": "批次列（adata.obs 列名，用于 batch_key 注入）",
+      "type": "string",
+      "default": "batch",
+      "required": false
+    },
+    {
+      "id": "layer",
+      "label": "counts layer 名（scvi-tools 需要 raw counts）",
+      "type": "string",
+      "default": "counts",
+      "required": false
+    },
+    {
+      "id": "n_latent",
+      "label": "scVI latent dim",
+      "type": "number",
+      "default": 10,
+      "required": false,
+      "minimum": 1,
+      "maximum": 64
+    },
+    {
+      "id": "n_hidden",
+      "label": "scVI hidden dim",
+      "type": "number",
+      "default": 128,
+      "required": false,
+      "minimum": 16,
+      "maximum": 512
+    },
+    {
+      "id": "n_layers",
+      "label": "scVI hidden layer 数",
+      "type": "number",
+      "default": 2,
+      "required": false,
+      "minimum": 1,
+      "maximum": 4
+    },
+    {
+      "id": "max_epochs",
+      "label": "最大训练 epoch 数",
+      "type": "number",
+      "default": 5,
+      "required": false,
+      "minimum": 1,
+      "maximum": 100
+    },
+    {
+      "id": "batch_size",
+      "label": "训练 batch_size",
+      "type": "number",
+      "default": 64,
+      "required": false,
+      "minimum": 8,
+      "maximum": 256
+    },
+    {
+      "id": "device",
+      "label": "device（cpu / auto）",
+      "type": "select",
+      "default": "cpu",
+      "options": ["cpu", "auto"],
+      "required": false
+    },
+    {
+      "id": "seed",
+      "label": "随机种子",
+      "type": "number",
+      "default": 42,
+      "required": false,
+      "minimum": 0
+    }
+  ],
+  "outputs": [
+    { "id": "latent_embedding", "filename": "latent_embedding.csv", "type": "table", "label": "scVI 隐空间嵌入" },
+    { "id": "normalized_expression", "filename": "normalized_expression.csv", "type": "table", "label": "标准化表达矩阵" },
+    { "id": "integrated_h5ad", "filename": "integrated.h5ad", "type": "data", "label": "整合后 AnnData (含 latent)" },
+    { "id": "latent_umap", "filename": "latent_umap.png", "type": "plot", "label": "隐空间 UMAP" },
+    { "id": "latent_umap_batch", "filename": "latent_umap_batch.png", "type": "plot", "label": "隐空间 UMAP (按 batch 着色)" },
+    { "id": "training_loss", "filename": "training_loss.csv", "type": "table", "label": "训练 loss 曲线" },
+    { "id": "report", "filename": "report.html", "type": "report", "label": "scvi-tools 分析报告" },
+    { "id": "manifest", "filename": "manifest.json", "type": "manifest", "label": "Job manifest" }
+  ],
+  "tutorialUrl": "/docs/single-cell/scvi-tools",
+  "demoDataUrl": "/demo-data/scvi-tools-demo",
+  "estimatedMinutes": 4,
+  "packages": ["scanpy", "anndata", "pandas", "numpy", "scipy", "matplotlib", "seaborn", "Pillow", "scvi-tools", "torch"],
+  "color": "#9333ea",
+  "reportUrl": "/exports/tools/scvi-tools/index.html",
+  "ipcChannel": "tools:invoke/scvi-tools",
+  "diagnostics": {
+    "stdout": "scvi-tools > 进度通过 progress.json 驱动 + pytorch-lightning training progress",
+    "stderr": "preflight 失败 → exit 3 (missing-inputs); runtime 缺 scvi-tools/torch → exit 4 (runtime-not-ready); empty-result → exit 5; valid → exit 0",
+    "exitCodeMap": {
+      "0": "valid",
+      "3": "missing_required_file_inputs",
+      "4": "runtime_not_ready",
+      "5": "empty_result"
+    }
+  },
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少 .h5ad 输入文件",
+      "description": "job 目录未发现合法的 .h5ad (>1KB) 输入；上游应为 scanpy-advanced / sample-metadata-validator 链式产物。",
+      "recoverable": true,
+      "suggestedFix": "确认 anndata_file input 已绑定且文件 >1KB；或先跑 scanpy-advanced 上游产出。",
+      "detect": "未找到 h5ad 文件 \\| anndata_file missing \\| 缺少 h5ad"
+    },
+    {
+      "code": "runtime_not_ready",
+      "title": "scvi-tools / torch 未安装",
+      "description": "biof3-py-runtime 未装 scvi-tools >=1.0 或 torch >=2.0；install.json 步骤未执行。",
+      "recoverable": true,
+      "suggestedFix": "在 biof3-py-runtime venv 内部执行 `pip install scvi-tools torch` (install.json 步骤)；或确认 runtime 制品已扩展。",
+      "detect": "ImportError: No module named scvi \\| ModuleNotFoundError: No module named torch \\| scvi-tools 缺少依赖"
+    },
+    {
+      "code": "empty_result",
+      "title": "AnnData 维度不够",
+      "description": "输入 n_obs<10 或 n_vars<2 时 scvi-tools 无法训练；脚本仍落盘 placeholder 输出与 qc 摘要。",
+      "recoverable": true,
+      "suggestedFix": "用更大数据集；或降低 QC 阈值；或先跑 scanpy-advanced 上游。",
+      "detect": "细胞数过少 \\| 基因数过少 \\| insufficient cells \\| insufficient genes"
+    }
+  ],
+  "resultStudio": {
+    "contractVersion": 1,
+    "descriptorVersion": 1,
+    "semanticType": "single_cell_deep_generative",
+    "entity": {
+      "type": "cell_embedding",
+      "idField": "cell_id",
+      "fields": {
+        "cell_id": "string",
+        "latent_1": "number",
+        "latent_2": "number",
+        "latent_n": "number",
+        "batch": "string"
+      }
+    },
+    "source": {
+      "strategy": "execution_snapshot_per_artifact",
+      "entryPoint": "scripts/scvi-tools.py"
+    },
+    "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.py",
+    "inputBindings": [
+      {
+        "inputId": "anndata_file",
+        "required": true,
+        "acceptsArtifactTypes": ["data"],
+        "semanticRole": "single_cell_expression_matrix"
+      }
+    ],
+    "parameters": {
+      "batch_key": { "type": "string", "default": "batch" },
+      "layer": { "type": "string", "default": "counts" },
+      "n_latent": { "type": "number", "default": 10, "minimum": 1, "maximum": 64 },
+      "n_hidden": { "type": "number", "default": 128, "minimum": 16, "maximum": 512 },
+      "n_layers": { "type": "number", "default": 2, "minimum": 1, "maximum": 4 },
+      "max_epochs": { "type": "number", "default": 5, "minimum": 1, "maximum": 100 },
+      "batch_size": { "type": "number", "default": 64, "minimum": 8, "maximum": 256 },
+      "device": { "type": "select", "default": "cpu", "options": ["cpu", "auto"] },
+      "seed": { "type": "number", "default": 42, "minimum": 0 }
+    },
+    "parameterImpacts": {
+      "batch_key": "scientific",
+      "layer": "scientific",
+      "n_latent": "scientific",
+      "n_hidden": "scientific",
+      "n_layers": "scientific",
+      "max_epochs": "scientific",
+      "batch_size": "scientific",
+      "device": "scientific",
+      "seed": "scientific"
+    },
+    "actions": ["filter_cells", "rerun_training", "change_n_latent", "change_epochs", "recompute"],
+    "artifacts": [
+      { "id": "latent_embedding", "type": "table", "filename": "latent_embedding.csv", "interaction": "interactive" },
+      { "id": "normalized_expression", "type": "table", "filename": "normalized_expression.csv", "interaction": "interactive" },
+      { "id": "integrated_h5ad", "type": "data", "filename": "integrated.h5ad", "interaction": "interactive" },
+      { "id": "latent_umap", "type": "plot", "filename": "latent_umap.png", "interaction": "interactive" },
+      { "id": "report", "type": "report", "filename": "report.html", "interaction": "noninteractive" }
+    ],
+    "interactionMappings": [
+      { "artifactId": "latent_embedding", "mode": "table", "entityType": "cell", "idField": "cell_id" },
+      { "artifactId": "normalized_expression", "mode": "table", "entityType": "gene", "idField": "gene" },
+      { "artifactId": "integrated_h5ad", "mode": "anndata", "entityType": "cell", "idField": "obs_name" },
+      { "artifactId": "latent_umap", "mode": "plot", "entityType": "image" }
+    ]
+  }
+}

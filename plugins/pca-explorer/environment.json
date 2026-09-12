@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "runtime": {
+    "language": "python",
+    "version": ">=3.10.0",
+    "builtAgainst": "3.11",
+    "platforms": ["macos-arm64", "macos-x64", "windows-x64"]
+  },
+  "capabilities": [],
+  "packages": {
+    "python": {
+      "pandas": ">=2.0.0",
+      "scikit-learn": ">=1.3.0",
+      "matplotlib": ">=3.7.0"
+    }
+  },
+  "policy": {
+    "installInScript": false,
+    "networkDuringAnalysis": false,
+    "recordPackageVersions": true,
+    "recordRuntimeVersion": true
+  }
+}

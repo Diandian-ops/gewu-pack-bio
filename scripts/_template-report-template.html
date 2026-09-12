@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>__TOOL_TITLE__ - 结果解读报告 | BioF3</title>
+  <style>
+  :root { --text: #17201d; --muted: #5c6b64; --border: #dfe8e3; --surface: #f8faf9; --primary: #2e8555; --code-bg: #f4f7f5; --warn: #d97706; --info: #2563eb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: var(--text); font: 14px/1.72 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif; }
+  .report { max-width: 860px; padding: 40px 32px 60px; margin: 0 auto; margin-left: max(200px, calc(50% - 330px)); }
+  .report.full { margin-left: auto; margin-right: auto; }
+  .report-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 32px; position: relative; }
+  .report-header .eyebrow { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; }
+  .report-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .report-header .meta { font-size: 12px; color: var(--muted); }
+  h2 { font-size: 18px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; }
+  p { margin: 0 0 12px; } ul, ol { margin: 0 0 12px; padding-left: 22px; } li { margin-bottom: 4px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 6px; overflow-x: auto; margin: 0 0 16px; font-size: 13px; line-height: 1.5; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 13px; }
+  th, td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
+  th { background: var(--surface); font-weight: 600; }
+  .callout { padding: 14px 16px; border-radius: 6px; margin: 16px 0; font-size: 13px; }
+  .callout-info { background: #eff6ff; border-left: 3px solid var(--info); }
+  .callout-warn { background: #fffbeb; border-left: 3px solid var(--warn); }
+  .callout-tip { background: #ecfdf5; border-left: 3px solid var(--primary); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .fig { margin: 20px 0; text-align: center; }
+  .fig img { max-width: 55%; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.1); cursor: zoom-in; transition: transform .3s; } .fig img.zoomed { max-width: 100%; cursor: zoom-out; }
+  .fig-caption { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card .value { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .biof3-wm { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27200%27%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2728%27 font-weight=%27800%27 fill=%27%232e8555%27 opacity=%270.04%27 transform=%27rotate(-25 150 100)%27%3EBioF3%3C/text%3E%3Ctext x=%2750%25%27 y=%2770%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2710%27 font-weight=%27700%27 fill=%27%232e8555%27 opacity=%270.035%27 transform=%27rotate(-25 150 100)%27%3ESHENGXIN F3%3C/text%3E%3C/svg%3E"); }
+  .nav-wrap { position: fixed; left: 0; top: 0; bottom: 0; width: 200px; background: #f8faf9; border-right: 1px solid #dfe8e3; padding: 20px 12px; overflow-y: auto; font-size: 12px; z-index: 50; transition: transform .2s; box-shadow: 2px 0 8px rgba(0,0,0,.06); }
+  .nav-wrap.hidden { transform: translateX(-100%); box-shadow: none; }
+  .nav-toggle { position: fixed; left: 8px; top: 8px; z-index: 60; background: #fff; border: 1px solid #dfe8e3; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .nav-wrap .nav-title { font-weight: 700; font-size: 13px; margin-bottom: 12px; color: #2e8555; }
+  .nav-wrap a { display: block; padding: 4px 0; color: #5c6b64; text-decoration: none; line-height: 1.4; }
+  .nav-wrap a:hover { color: #2e8555; }
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<button class="nav-toggle" onclick="var n=document.querySelector('.nav-wrap'),r=document.querySelector('.report');n.classList.toggle('hidden');r.classList.toggle('full');this.textContent=n.classList.contains('hidden')?'☰':'✕'" title="切换目录">☰</button>
+<div class="biof3-wm" aria-hidden="true"></div>
+<nav class="nav-wrap" id="reportNav"><div class="nav-title">目录</div></nav>
+
+<div class="report">
+
+<header class="report-header">
+  <div class="eyebrow">BioF3 分析工具 · 结果解读报告</div>
+  <h1>__TOOL_TITLE__</h1>
+  <p class="meta">工具版本：<pkg> · 报告模板 v1.0 · 生成于 BioF3 在线分析平台</p>
+</header>
+
+<!-- ============================================================ -->
+<!-- ★ 一、分析概览：简述工具目的，stat-grid 放关键数字 -->
+<h2>一、分析概览</h2>
+
+<p>本报告对 __TOOL_TITLE__ 的分析结果进行解读。<在此处用 2-3 句话说明工具做了什么、采用什么方法、核心输出是什么></p>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="value">{{samples}}</div><div class="label">样本数</div></div>
+  <div class="stat-card"><div class="value">{{features}}</div><div class="label">特征数</div></div>
+  <!-- 按需增删 stat-card -->
+</div>
+
+<!-- ★ callout：放方法说明、解读标准等 -->
+<div class="callout callout-info">
+  <strong>方法说明</strong>
+  <ul style="margin:0;padding-left:18px;">
+    <li><要点 1></li>
+    <li><要点 2></li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- ★ 二、结果图：每个图一个 .fig 块，src 用 {{xxx.png}} 占位 -->
+<h2>二、<结果图 1 标题></h2>
+
+<div class="fig">
+  <img src="{{result_fig1.png}}" alt="图 1">
+  <div class="fig-caption">图 1：<图注，说明横纵轴、颜色含义、如何解读></div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li><解读要点 1></li>
+  <li><解读要点 2></li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>三、输出数据文件</h2>
+
+<table>
+  <thead><tr><th>文件名</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><code>result_table.csv</code></td><td>结果表</td></tr>
+    <tr><td><code>result_fig1.png / .pdf</code></td><td>结果图（双格式）</td></tr>
+    <tr><td><code>summary.txt</code></td><td>分析摘要</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2>四、下游分析建议</h2>
+
+<ol>
+  <li><下游建议 1></li>
+  <li><下游建议 2></li>
+</ol>
+
+<div class="callout callout-warn">
+  <strong>注意：<注意事项标题></strong>
+  <注意事项内容>
+</div>
+
+<!-- ============================================================ -->
+<h2>五、方法学说明（可用于论文 Methods）</h2>
+
+<pre>
+<在此处写英文 Methods 段落，可复制到论文>
+</pre>
+
+<!-- ============================================================ -->
+<h2>六、参考资料</h2>
+
+<ul>
+  <li><文献引用></li>
+  <li><a href="https://biof3.com/docs/">BioF3 教程</a></li>
+</ul>
+
+<div class="footer">
+  <p>本报告由 BioF3 在线分析平台自动生成，仅供学习参考。如需用于正式发表，请结合实际数据和实验设计进行调整。</p>
+  <p>BioF3 - AI 陪伴的全组学学习与实战平台 · <a href="https://biof3.com">biof3.com</a></p>
+</div>
+
+</div><!-- /.report -->
+<script>document.querySelectorAll(".fig img").forEach(function(img){img.addEventListener("click",function(){this.classList.toggle("zoomed")})});var nav=document.getElementById("reportNav");if(nav){document.querySelectorAll(".report h2").forEach(function(h,i){h.id=h.id||"s"+i;var a=document.createElement("a");a.href="#"+h.id;a.textContent=h.textContent;nav.appendChild(a)});}</script>
+</body>
+</html>

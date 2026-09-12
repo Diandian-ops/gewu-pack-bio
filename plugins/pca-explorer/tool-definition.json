@@ -1,0 +1,87 @@
+{
+  "id": "pca-explorer",
+  "title": "PCA 可视化",
+  "subtitle": "降维分析",
+  "category": "机器学习",
+  "language": "python",
+  "description": "PCA 降维 + 散点图",
+  "inputs": [
+    {
+      "id": "expr_matrix",
+      "label": "表达矩阵 (CSV: 行=样本, 列=基因)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv"
+    },
+    {
+      "id": "group_file",
+      "label": "分组文件 (CSV: sample, group)，可选",
+      "type": "file",
+      "required": false,
+      "accept": ".csv",
+      "hint": "不提供则显示明确的未分组投影，不猜测实验分组"
+    },
+    {
+      "id": "n_components",
+      "label": "主成分数量",
+      "type": "number",
+      "default": 2,
+      "hint": "默认 2（绘制 PC1 vs PC2）"
+    }
+  ],
+  "outputs": [
+    {
+      "id": "pca_plot",
+      "type": "plot",
+      "label": "PCA 散点图"
+    },
+    {
+      "id": "variance_table",
+      "type": "table",
+      "label": "方差贡献表"
+    }
+  ],
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少必需输入文件",
+      "description": "PCA 至少需要表达矩阵；如果 group_file 也需要则应在确认卡中提示。",
+      "recoverable": true,
+      "suggestedFix": "先补齐表达矩阵，再让 Harness 根据项目文件自动推荐分组文件。",
+      "detect": "missing required file inputs|missing input file|please provide file"
+    },
+    {
+      "code": "non_numeric_expression_matrix",
+      "title": "表达矩阵包含非数值列",
+      "description": "PCA 输入矩阵除样本/索引列外必须主要为数值表达量。",
+      "recoverable": true,
+      "suggestedFix": "探测并移除明显的样本 ID/注释列，仅保留数值列进入 PCA。",
+      "detect": "non numeric expression matrix|non-numeric columns|numeric columns"
+    },
+    {
+      "code": "sample_group_mismatch",
+      "title": "分组文件与表达矩阵样本不匹配",
+      "description": "group_file 中的 sample 列与表达矩阵样本名无法对齐。",
+      "recoverable": true,
+      "suggestedFix": "根据交集自动对齐样本；如果交集过少，则请求用户确认分组文件。",
+      "detect": "sample group mismatch|group file|sample names do not match"
+    },
+    {
+      "code": "n_components_too_large",
+      "title": "主成分数量超过可计算上限",
+      "description": "n_components 过大时应裁剪到样本数和特征数允许的上限。",
+      "recoverable": true,
+      "suggestedFix": "将 n_components 自动裁剪到最大可计算值，并提示用户当前输入规模。",
+      "detect": "n_components too large|clamp n_components|too many components"
+    },
+    {
+      "code": "too_few_samples_or_features",
+      "title": "样本或特征数量不足",
+      "description": "PCA 至少需要足够的样本和数值特征才能计算指定主成分。",
+      "recoverable": true,
+      "suggestedFix": "将 n_components 裁剪到可计算上限；如果样本或特征少于 2，则中断并提示。",
+      "detect": "too few samples|too few features|insufficient samples"
+    }
+  ],
+  "estimatedMinutes": 2
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "runtime": {
+    "language": "python",
+    "version": ">=3.10.0",
+    "builtAgainst": "3.11.9",
+    "platforms": ["macos-arm64", "windows-x64"]
+  },
+  "capabilities": ["py-single-cell", "py-deep-learning"],
+  "packages": {
+    "python": {
+      "scanpy": ">=1.9",
+      "anndata": ">=0.9",
+      "numpy": ">=1.24",
+      "pandas": ">=2.0",
+      "scipy": ">=1.10",
+      "matplotlib": ">=3.7",
+      "seaborn": ">=0.12",
+      "Pillow": ">=9.0",
+      "scvi-tools": ">=1.0",
+      "torch": ">=2.0"
+    }
+  },
+  "policy": {
+    "installInScript": false,
+    "networkDuringAnalysis": false,
+    "recordPackageVersions": true,
+    "recordRuntimeVersion": true,
+    "device": "cpu"
+  },
+  "notes": "scvi-tools + torch 不在 biof3-py-runtime 基础栈中（见 PHASE 0 runtime inventory）。本插件声明二者作为额外依赖；install.json 提供 pip install 步骤，**在 biof3-py-runtime venv 内部**执行。CPU 模式避免触发 GPU 依赖链（GPU/MPS 验证属 G1+ 阶段）。dev Electron 边界内 verified 时段 scvi-tools 1.4.2 + torch 2.13.0 实测可训练。"
+}

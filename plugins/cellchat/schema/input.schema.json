@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "biof3://plugins/cellchat/input.schema.json",
+  "title": "cellchat input schema",
+  "description": "JSON schema for params.json passed to cellchat.R via BioF3 dispatcher. Compatible with biof3-r-runtime CellChat>=1.6.0 + Seurat>=5.0.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["seurat_rds", "cell_type_col"],
+  "properties": {
+    "seurat_rds": {
+      "type": "string",
+      "description": "Filename of Seurat RDS object in jobDir (or absolute path). Must exist and be >1KB; meta.data must contain cell_type_col."
+    },
+    "cell_type_col": {
+      "type": "string",
+      "default": "cell_type",
+      "description": "Column in Seurat meta.data containing cell type labels used as cellchat group.by."
+    },
+    "species": {
+      "type": "string",
+      "enum": ["human", "mouse", "zebrafish"],
+      "default": "human",
+      "description": "Selects CellChatDB.human / CellChatDB.mouse / CellChatDB.zebrafish."
+    },
+    "db_category": {
+      "type": "string",
+      "enum": ["Secreted Signaling", "Cell-Cell Contact", "ECM-Receptor", "Non-protein Signaling", "all"],
+      "default": "Secreted Signaling",
+      "description": "subsetDB(search = ...) filter; 'all' keeps the full DB."
+    },
+    "min_cells": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 10,
+      "description": "Minimum cells per group required to compute communications; used by computeCommunProb and filterCommunication."
+    },
+    "pvalue_threshold": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.05,
+      "description": "p-value cutoff for permutation test in computeCommunProb."
+    },
+    "n_patterns": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 10,
+      "default": 5,
+      "description": "Number of NMF latent patterns for identifyCommunicationPatterns (only used when compute_hierarchy=true)."
+    },
+    "compute_hierarchy": {
+      "type": "string",
+      "enum": ["true", "false"],
+      "default": "false",
+      "description": "Whether to run selectK + identifyCommunicationPatterns + netAnalysis_signalingRole (slow)."
+    }
+  }
+}

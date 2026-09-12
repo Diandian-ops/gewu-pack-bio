@@ -1,0 +1,36 @@
+{
+  "id": "scvi-tools",
+  "status": "canonical",
+  "pluginManifestVersion": 1,
+  "title": "scvi-tools 深度生成单细胞分析",
+  "version": "1.0.0",
+  "language": "python",
+  "sourcePolicy": "builtin-canonical",
+  "description": "scvi-tools (scVI) 深度生成模型 单细胞分析与批次整合：基于 AnnData (.h5ad) 训练 SCVI 变分自编码器 → 隐空间嵌入 / 标准化表达 / 批次整合。biof3-py-runtime 基础栈 + scvi-tools>=1.0 + pytorch (CPU 默认)。dev Electron 边界内 verified（G0 阶段）。",
+  "packages": {
+    "python": {
+      "scanpy": ">=1.9",
+      "anndata": ">=0.9",
+      "numpy": ">=1.24",
+      "pandas": ">=2.0",
+      "scipy": ">=1.10",
+      "matplotlib": ">=3.7",
+      "seaborn": ">=0.12",
+      "Pillow": ">=9.0",
+      "scvi-tools": ">=1.0",
+      "torch": ">=2.0"
+    }
+  },
+  "runtime": {
+    "python": ">=3.10.0"
+  },
+  "builtAgainst": {
+    "python": "3.11.9",
+    "scvi-tools": "1.4.2",
+    "torch": "2.13.0"
+  },
+  "platform": ["macos-arm64", "windows-x64"],
+  "supportedPlatforms": ["macos-arm64", "windows-x64"],
+  "device": "cpu",
+  "notes": "scvi-tools 与 torch 不在 biof3-py-runtime 基础栈中；本插件声明二者作为额外依赖，由 install.json 提供的步骤执行 pip install（**在 biof3-py-runtime venv 内部**），避免修改 biof3-py-runtime 制品本身。CPU 模式避免触发 GPU 依赖链（GPU/MPS 验证属于 G1+ 阶段）。"
+}

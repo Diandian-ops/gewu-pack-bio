@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "biof3://plugins/celltypist/output.schema.json",
+  "title": "celltypist output schema",
+  "description": "JSON schema for the 8 expected outputs from celltypist.py (files written to <jobDir>/output/).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["outputs", "stats"],
+  "properties": {
+    "outputs": {
+      "type": "array",
+      "description": "List of 8 file names written under jobDir/output/.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "predictions.csv",
+          "probabilities.csv",
+          "confusion_matrix.csv",
+          "annotated.h5ad",
+          "umap_annotation.png",
+          "umap_confidence.png",
+          "report.html",
+          "manifest.json"
+        ]
+      },
+      "minItems": 1
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["n_cells_in", "n_genes_in", "n_cells_after_qc", "n_predicted", "n_clusters", "n_celltypes", "fallback_used"],
+      "properties": {
+        "n_cells_in": { "type": "integer", "minimum": 0 },
+        "n_genes_in": { "type": "integer", "minimum": 0 },
+        "n_cells_after_qc": { "type": "integer", "minimum": 0 },
+        "n_predicted": { "type": "integer", "minimum": 0 },
+        "n_clusters": { "type": "integer", "minimum": 0 },
+        "n_celltypes": { "type": "integer", "minimum": 0 },
+        "fallback_used": { "type": "integer", "enum": [0, 1], "description": "1 if celltypist unavailable and scanpy-based heuristic fallback was used; 0 otherwise" },
+        "model_name": { "type": ["string", "null"] },
+        "model_path": { "type": ["string", "null"] },
+        "majority_voting": { "type": "boolean" },
+        "mode": { "type": "string" }
+      }
+    }
+  }
+}

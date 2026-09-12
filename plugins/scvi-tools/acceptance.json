@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "scvi-tools",
+  "pluginVersion": "1.0.0",
+  "platforms": ["macos-arm64", "windows-x64"],
+  "fixtures": [
+    {
+      "id": "valid",
+      "description": "PBMC 3k-like h5ad fixture (270 cells × 100 highly variable genes) with `counts` layer + `batch` obs col — scvi-tools SCVI 训练 5 epochs → latent (270, 10) + normalized expression (270, 100) + UMAP + report. Requires scvi-tools>=1.0 + torch already installed in biof3-py-runtime venv (install.json 步骤执行).",
+      "inputs": {
+        "anndata_file": "demo-data/pbmc_3k_mini.h5ad",
+        "batch_key": "batch",
+        "layer": "counts",
+        "n_latent": 10,
+        "n_hidden": 64,
+        "n_layers": 2,
+        "max_epochs": 5,
+        "batch_size": 64,
+        "device": "cpu",
+        "seed": 42
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": [
+        "latent_embedding.csv",
+        "normalized_expression.csv",
+        "integrated.h5ad",
+        "latent_umap.png",
+        "latent_umap_batch.png",
+        "training_loss.csv",
+        "report.html",
+        "manifest.json"
+      ]
+    },
+    {
+      "id": "missing-inputs",
+      "description": "No h5ad file in jobDir — preflight fails fast with exit code 3",
+      "inputs": {},
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "missing_required_file_inputs"
+    },
+    {
+      "id": "runtime-not-ready",
+      "description": "biof3-py-runtime venv does not have scvi-tools or torch — ImportError at runtime entry, exit code 4",
+      "inputs": {
+        "anndata_file": "demo-data/pbmc_3k_mini.h5ad"
+      },
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "runtime_not_ready",
+      "skipOnSupportedPlatform": true
+    },
+    {
+      "id": "empty-result",
+      "description": "Tiny AnnData (n_obs < 10) — script returns exit code 5 with placeholder PNG + qc summary, valid status with empty-result note",
+      "inputs": {
+        "anndata_file": "demo-data/pbmc_3k_mini.h5ad",
+        "n_latent": 1,
+        "n_hidden": 16,
+        "max_epochs": 1,
+        "batch_size": 8
+      },
+      "expectedStatus": "valid",
+      "expectedFailureMode": "empty_result"
+    }
+  ],
+  "reproducibility": {
+    "requireScriptSha256": true,
+    "requireParamsHash": true,
+    "requireInputSha256": true,
+    "requireOutputSha256": true,
+    "requirePythonVersion": true,
+    "requirePackageVersions": true,
+    "evidenceSource": "runtime-generated artifact-manifest.json + provenance.json"
+  },
+  "runtimeExtension": {
+    "strategy": "pip install in biof3-py-runtime venv (does NOT modify biof3-py-runtime artifact)",
+    "extraDependencies": [
+      { "name": "scvi-tools", "version": ">=1.0", "testedVersion": "1.4.2" },
+      { "name": "torch", "version": ">=2.0", "testedVersion": "2.13.0" }
+    ],
+    "device": "cpu",
+    "notes": "scvi-tools 与 torch 不在 biof3-py-runtime 基础栈中（PHASE 0 runtime inventory 已确认）。SUB-1.5 实施时段实测在 biof3-py-runtime venv 内部 `pip install scvi-tools torch` 成功（macOS arm64, 约 5min）。如 runtime 未扩展本插件会触发 runtime-not-ready 失败模式（fixture 标 skipOnSupportedPlatform=true）。COOL G1+ 阶段才会考虑把 scvi-tools 纳入 biof3-py-runtime 基础栈。"
+  }
+}

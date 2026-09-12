@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "biof3://plugins/cellchat/output.schema.json",
+  "title": "cellchat output schema",
+  "description": "JSON schema for the 8 expected outputs from cellchat.R (files written to <jobDir>/output/).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["outputs", "stats"],
+  "properties": {
+    "outputs": {
+      "type": "array",
+      "description": "List of 8 file names written under jobDir/output/.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "communications_table.csv",
+          "pathway_enrichment.csv",
+          "interaction_heatmap.png",
+          "chord_diagram.png",
+          "bubble_plot.png",
+          "cellchat_object.rds",
+          "report.html",
+          "manifest.json"
+        ]
+      },
+      "minItems": 1
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["n_cells", "n_genes", "n_cell_groups", "n_lr_pairs", "n_pathways"],
+      "properties": {
+        "n_cells": { "type": "integer", "minimum": 0 },
+        "n_genes": { "type": "integer", "minimum": 0 },
+        "n_cell_groups": { "type": "integer", "minimum": 0 },
+        "n_lr_pairs": { "type": "integer", "minimum": 0 },
+        "n_pathways": { "type": "integer", "minimum": 0 },
+        "species": { "type": "string", "enum": ["human", "mouse", "zebrafish"] },
+        "db_category": { "type": "string" },
+        "min_cells": { "type": "integer", "minimum": 1 },
+        "pvalue_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "compute_hierarchy": { "type": "boolean" }
+      }
+    }
+  }
+}

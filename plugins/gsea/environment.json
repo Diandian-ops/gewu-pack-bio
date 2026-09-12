@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "runtime": {
+    "language": "r",
+    "version": ">=4.4.0",
+    "builtAgainst": "4.5",
+    "platforms": ["macos-arm64"]
+  },
+  "capabilities": ["r-enrichment"],
+  "requiresBundle": "r-enrichment",
+  "requiresBundleVersion": "1.0.0",
+  "packages": {
+    "r": {
+      "clusterProfiler": ">=4.18.0",
+      "enrichplot": ">=1.30.0",
+      "DOSE": ">=4.4.0",
+      "org.Hs.eg.db": ">=3.22.0",
+      "org.Mm.eg.db": ">=3.22.0",
+      "msigdbr": ">=26.1.0",
+      "KEGGREST": ">=1.50.0",
+      "ggplot2": ">=4.0.0",
+      "jsonlite": ">=1.8.0",
+      "base64enc": ">=0.1-3"
+    }
+  },
+  "policy": {
+    "installInScript": false,
+    "networkDuringAnalysis": false,
+    "recordPackageVersions": true,
+    "recordRuntimeVersion": true
+  }
+}

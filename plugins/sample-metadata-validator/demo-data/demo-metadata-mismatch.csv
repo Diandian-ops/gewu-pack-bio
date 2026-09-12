@@ -1,0 +1,7 @@
+sample,condition,batch
+WT_1,WT,b1
+WT_2,WT,b1
+WT_3,WT,b2
+Sample_X,KO,b1
+Sample_Y,KO,b2
+Sample_Z,KO,b2

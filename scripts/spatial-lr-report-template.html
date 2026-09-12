@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>空间配体-受体分析 - 结果解读报告 | BioF3</title>
+  <style>
+  :root { --text: #17201d; --muted: #5c6b64; --border: #dfe8e3; --surface: #f8faf9; --primary: #2e8555; --code-bg: #f4f7f5; --warn: #d97706; --info: #2563eb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: var(--text); font: 14px/1.72 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif; }
+  .report { max-width: 860px; padding: 40px 32px 60px; margin: 0 auto; margin-left: max(200px, calc(50% - 330px)); }
+  .report.full { margin-left: auto; margin-right: auto; }
+  .report-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 32px; }
+  .report-header .eyebrow { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; }
+  .report-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .report-header .meta { font-size: 12px; color: var(--muted); }
+  h2 { font-size: 18px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  p { margin: 0 0 12px; } ul, ol { margin: 0 0 12px; padding-left: 22px; } li { margin-bottom: 4px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 13px; }
+  th, td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
+  th { background: var(--surface); font-weight: 600; }
+  .callout { padding: 14px 16px; border-radius: 6px; margin: 16px 0; font-size: 13px; }
+  .callout-info { background: #eff6ff; border-left: 3px solid var(--info); }
+  .fig { margin: 20px 0; text-align: center; }
+  .fig img { max-width: 60%; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.1); cursor: zoom-in; } .fig img.zoomed { max-width: 100%; cursor: zoom-out; }
+  .fig-caption { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card .value { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; align-items: flex-start; }
+  .footer-qr { width: 56px; height: 56px; border-radius: 4px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+<div class="report">
+
+<header class="report-header">
+  <div class="eyebrow">BioF3 分析工具 · 结果解读报告</div>
+  <h1>空间配体-受体分析（LIANA Bivariate）</h1>
+  <p class="meta">工具版本：liana / squidpy · 生成于 BioF3 在线分析平台</p>
+</header>
+
+<h2>一、分析概览</h2>
+<p>本报告对空间配体-受体（LR）分析结果进行解读。采用 LIANA bivariate 方法，直接在 spot 物理邻居上计算配体-受体共现，无需预注释细胞类型。与 cluster-level 通讯（如 CellChat）不同，本方法在 spot 级别捕捉空间邻域信号。</p>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="value">{{n_spots}}</div><div class="label">Spot 数</div></div>
+  <div class="stat-card"><div class="value">{{n_lr_pairs_tested}}</div><div class="label">测试 LR 对数</div></div>
+  <div class="stat-card"><div class="value">{{n_significant}}</div><div class="label">显著 LR 对数</div></div>
+  <div class="stat-card"><div class="value">{{topN}}</div><div class="label">展示 Top-N</div></div>
+</div>
+
+<div class="callout callout-info">
+  <strong>方法参数</strong>
+  <ul style="margin:0;padding-left:18px;">
+    <li>LR 资源: {{resource}} | 局部度量: {{local_name}}</li>
+    <li>排列次数: {{nPerms}}</li>
+    <li><strong>Top LR pairs</strong>：{{top_lr_pairs_list}}</li>
+  </ul>
+</div>
+
+<h2>二、Top LR 显著性</h2>
+<div class="fig">
+  <img src="{{plot_001_top_lr_significance.png}}" alt="Top LR 显著性">
+  <div class="fig-caption">图 1：Top-15 显著 LR pairs 的得分排序。横轴=LR pair，纵轴=mean score / frac_active。</div>
+</div>
+
+<h2>三、Top LR 空间分布</h2>
+<div class="fig">
+  <img src="{{plot_002_top_lr_spatial.png}}" alt="Top LR 空间分布">
+  <div class="fig-caption">图 2：得分最高的 LR pair 在组织空间上的分布。展示通讯热点区域。</div>
+</div>
+
+<h2>四、LR 得分分布</h2>
+<div class="fig">
+  <img src="{{plot_003_lr_score_distribution.png}}" alt="LR 得分分布">
+  <div class="fig-caption">图 3：Top-N LR pairs 的得分箱线图。展示各 LR pair 在不同 spot 间的得分变异。</div>
+</div>
+<ul>
+  <li>得分分布宽 -> 该 LR pair 在不同区域活跃度差异大（空间特异）</li>
+  <li>得分分布窄 -> 该 LR pair 在全片均匀活跃（非空间特异）</li>
+</ul>
+
+<h2>五、Top LR pairs 空间散点</h2>
+<div class="fig">
+  <img src="{{plot_004_top_lr_pairs_grid.png}}" alt="Top LR pairs 网格">
+  <div class="fig-caption">图 4：Top-4 LR pairs 的 2×2 空间散点图，展示每个 LR pair 的空间分布模式。</div>
+</div>
+
+<h2>六、下游建议</h2>
+<ol>
+  <li><strong>结合解卷积</strong> - 用 spatial-deconv 的细胞类型丰度推断细胞类型间通讯</li>
+  <li><strong>与 CellChat 对比</strong> - 比较 spot-level vs cluster-level 通讯结果</li>
+  <li><strong>功能验证</strong> - 对显著 LR pair 的配体/受体基因做功能富集</li>
+</ol>
+
+<div class="footer">
+  <div>
+    <p>BioF3 - AI 陪伴的全组学学习与实战平台 · <a href="https://biof3.com">biof3.com</a></p>
+    <p>本报告自动生成，仅供学习参考。</p>
+  </div>
+  <img class="footer-qr" src="{{WECHAT_QR_BASE64}}" alt="QR">
+</div>
+
+</div>
+<script>document.querySelectorAll(".fig img").forEach(function(img){img.addEventListener("click",function(){this.classList.toggle("zoomed")})});</script>
+</body>
+</html>

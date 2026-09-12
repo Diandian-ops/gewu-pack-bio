@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "deg-standardizer",
+  "pluginVersion": "1.0.0",
+  "platforms": ["macos-arm64"],
+  "fixtures": [
+    {
+      "id": "valid",
+      "description": "12 genes with mix of significant and non-significant, up and down",
+      "inputs": {
+        "deg_results": "demo-data/demo-deg-results.csv",
+        "deg_artifact": "deseq2:valid:deg_results",
+        "gene_col": "gene",
+        "effect_col": "log2FoldChange",
+        "pval_col": "pvalue",
+        "padj_col": "padj",
+        "padj_threshold": 0.05,
+        "effect_threshold": 1,
+        "source_method": "DESeq2"
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": [
+        "deg_standardized.csv",
+        "deg_up.csv",
+        "deg_down.csv",
+        "ranked_genes.csv",
+        "filter_summary.json",
+        "report.html"
+      ]
+    },
+    {
+      "id": "empty-result",
+      "description": "4 genes, none significant — valid empty scientific result",
+      "inputs": {
+        "deg_results": "demo-data/demo-deg-empty-result.csv",
+        "gene_col": "gene",
+        "effect_col": "log2FoldChange",
+        "pval_col": "pvalue",
+        "padj_col": "padj",
+        "padj_threshold": 0.05,
+        "effect_threshold": 1,
+        "source_method": "DESeq2"
+      },
+      "expectedStatus": "warning",
+      "expectedNote": "No significant genes — valid empty result, not a failure"
+    },
+    {
+      "id": "no-padj",
+      "description": "DEG table missing padj column — must be blocked",
+      "inputs": {
+        "deg_results": "demo-data/demo-deg-no-padj.csv",
+        "gene_col": "gene",
+        "effect_col": "log2FoldChange",
+        "pval_col": "pvalue",
+        "padj_col": "padj",
+        "padj_threshold": 0.05,
+        "effect_threshold": 1,
+        "source_method": "DESeq2"
+      },
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "invalid_input"
+    },
+    {
+      "id": "missing-inputs",
+      "description": "No DEG file provided",
+      "inputs": {},
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "missing_required_file_inputs"
+    }
+  ],
+  "reproducibility": {
+    "requireScriptSha256": true,
+    "requireParamsHash": true,
+    "requireInputSha256": true,
+    "requireOutputSha256": true,
+    "requireRVersion": true,
+    "requirePackageVersions": true
+  }
+}

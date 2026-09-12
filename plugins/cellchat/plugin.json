@@ -1,0 +1,36 @@
+{
+  "id": "cellchat",
+  "status": "incubating",
+  "pluginManifestVersion": 1,
+  "title": "CellChat 细胞通讯推断",
+  "version": "1.0.0",
+  "language": "r",
+  "sourcePolicy": "builtin-canonical",
+  "description": "单细胞细胞-细胞通讯推断（R 包 CellChat 1.6+）：从 Seurat 对象出发做 CellChatDB 配体-受体库构建、通讯概率推断（computeCommunProb）、通路级通讯推断（computeCommunProbPathway），输出热图、弦图、气泡图与通路富集表。运行于 biof3-r-runtime (dev Electron 边界内)，CellChat 通过 BiocManager::install 在 biof3-r-runtime libPath 一次性安装（runtime 增量记录在 install.json）。",
+  "requiresBundle": "r-spatial",
+  "requiresBundleVersion": "1.0.0",
+  "packages": {
+    "r": {
+      "Seurat": ">=5.0.0",
+      "CellChat": ">=1.6.0",
+      "ggplot2": ">=4.0.0",
+      "ggalluvial": ">=0.12.3",
+      "ComplexHeatmap": ">=2.16.0",
+      "circlize": ">=0.4.15",
+      "igraph": ">=2.0.0",
+      "NMF": ">=0.27",
+      "BiocManager": ">=1.30.0",
+      "jsonlite": ">=1.8.0",
+      "base64enc": ">=0.1-3",
+      "png": ">=0.1-8"
+    }
+  },
+  "runtime": {
+    "r": ">=4.4.0"
+  },
+  "builtAgainst": {
+    "r": "4.5"
+  },
+  "platform": ["macos-arm64"],
+  "supportedPlatforms": ["macos-arm64"]
+}

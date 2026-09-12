@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>scVI 细胞类型注释 - 结果解读报告 | BioF3</title>
+  <style>
+  :root { --text: #17201d; --muted: #5c6b64; --border: #dfe8e3; --surface: #f8faf9; --primary: #2e8555; --code-bg: #f4f7f5; --warn: #d97706; --info: #2563eb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: var(--text); font: 14px/1.72 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif; }
+  .report { max-width: 860px; padding: 40px 32px 60px; margin: 0 auto; margin-left: max(200px, calc(50% - 330px)); }
+  .report.full { margin-left: auto; margin-right: auto; }
+  .report-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 32px; }
+  .report-header .eyebrow { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; }
+  .report-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .report-header .meta { font-size: 12px; color: var(--muted); }
+  h2 { font-size: 18px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  p { margin: 0 0 12px; } ul, ol { margin: 0 0 12px; padding-left: 22px; } li { margin-bottom: 4px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 6px; overflow-x: auto; margin: 0 0 16px; font-size: 13px; line-height: 1.5; }
+  .callout { padding: 14px 16px; border-radius: 6px; margin: 16px 0; font-size: 13px; }
+  .callout-info { background: #eff6ff; border-left: 3px solid var(--info); }
+  .callout-warn { background: #fffbeb; border-left: 3px solid var(--warn); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .fig { margin: 20px 0; text-align: center; }
+  .fig img { max-width: 55%; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.1); cursor: zoom-in; } .fig img.zoomed { max-width: 100%; cursor: zoom-out; }
+  .fig-caption { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card .value { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="report">
+
+<header class="report-header">
+  <div class="eyebrow">BioF3 分析工具 · 结果解读报告</div>
+  <h1>scVI 深度学习降维与聚类</h1>
+  <p class="meta">工具版本：scvi-tools · 生成于 BioF3 在线分析平台</p>
+</header>
+
+<h2>一、分析概览</h2>
+<p>本报告对 scVI（single-cell Variational Inference）的分析结果进行解读。scVI 是一种基于变分自编码器（VAE）的深度学习方法，通过学习细胞的低维潜空间表示，消除批次效应并进行聚类。与传统的 PCA 降维相比，scVI 能更好地处理 dropout 和计数数据的特性。</p>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="value">{{n_cells}}</div><div class="label">细胞数</div></div>
+  <div class="stat-card"><div class="value">{{n_clusters}}</div><div class="label">聚类数</div></div>
+  <div class="stat-card"><div class="value">{{n_latent}}</div><div class="label">潜空间维度</div></div>
+  <div class="stat-card"><div class="value">{{n_epochs}}</div><div class="label">训练轮数</div></div>
+</div>
+
+<div class="callout callout-info">
+  <strong>scVI 方法说明</strong>
+  <ul style="margin:0;padding-left:18px;">
+    <li><strong>VAE 架构</strong>：编码器将高维基因表达压缩到低维潜空间，解码器重构原始数据</li>
+    <li><strong>负二项分布</strong>：scVI 假设数据服从 NB 分布，适合 scRNA-seq 的 count 特性</li>
+    <li><strong>批次校正</strong>：如有 batch 信息，scVI 可在潜空间中自动校正批次效应</li>
+    <li>下游聚类基于 scVI latent representation 的 kNN 图 + Leiden</li>
+  </ul>
+</div>
+
+<h2>二、scVI UMAP 聚类</h2>
+<div class="fig">
+  <img src="{{plot_001_scvi_umap.png}}" alt="scVI UMAP">
+  <div class="fig-caption">图 1：基于 scVI 潜空间的 UMAP 投影，按 Leiden 聚类着色。展示细胞在低维空间的分布。</div>
+</div>
+<ul>
+  <li>聚类分离明显 -> scVI latent 有效捕获了细胞异质性</li>
+  <li>若有 batch 信息，观察不同 batch 在 UMAP 上的混合程度 -> 混合好=批次校正成功</li>
+  <li>与 PCA+UMAP 对比：scVI 通常在 dropout 严重的数据上表现更好</li>
+</ul>
+
+<h2>三、训练曲线</h2>
+<div class="fig">
+  <img src="{{plot_002_training.png}}" alt="训练曲线">
+  <div class="fig-caption">图 2：scVI 训练 ELBO（证据下界）曲线。ELBO 上升并趋于平稳 -> 模型收敛。</div>
+</div>
+<ul>
+  <li>ELBO 上升后趋于平稳 -> 模型收敛，训练正常</li>
+  <li>ELBO 未收敛（仍在上升）-> 可考虑增加 epochs</li>
+  <li>ELBO 震荡剧烈 -> 学习率可能过高或 batch size 过小</li>
+  <li>early stopping 会在 ELBO 不再改善时自动停止训练</li>
+</ul>
+
+<h2>四、输出文件</h2>
+<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:13px;">
+  <tr style="background:#f8faf9;"><th style="padding:8px 12px;border:1px solid #dfe8e3;text-align:left;">文件</th><th style="padding:8px 12px;border:1px solid #dfe8e3;text-align:left;">说明</th></tr>
+  <tr><td style="padding:8px 12px;border:1px solid #dfe8e3;"><code>result_scvi.h5ad</code></td><td style="padding:8px 12px;border:1px solid #dfe8e3;">处理后的 AnnData（含 X_scVI latent + leiden 聚类）</td></tr>
+  <tr><td style="padding:8px 12px;border:1px solid #dfe8e3;"><code>scvi_model/</code></td><td style="padding:8px 12px;border:1px solid #dfe8e3;">训练好的 scVI 模型（可用于新数据映射）</td></tr>
+  <tr><td style="padding:8px 12px;border:1px solid #dfe8e3;"><code>summary.json</code></td><td style="padding:8px 12px;border:1px solid #dfe8e3;">分析摘要</td></tr>
+</table>
+
+<h2>五、下游建议</h2>
+<ol>
+  <li><strong>差异表达</strong> - 基于 scVI latent 的聚类做 marker 基因鉴定</li>
+  <li><strong>细胞注释</strong> - 对 Leiden 聚类做生物学注释（marker / 参考映射）</li>
+  <li><strong>批次评估</strong> - 如有 batch 信息，用 kBET / iLISI 评估批次校正效果</li>
+  <li><strong>模型迁移</strong> - scvi_model 可用于 SCANVI 做有监督注释或新数据映射</li>
+</ol>
+
+<div class="callout callout-warn">
+  <strong>注意：scVI vs PCA 的选择</strong>
+  scVI 在细胞数 &gt;10000、dropout 严重或存在批次效应时优势明显。小数据集（&lt;3000 细胞）上 VAE 易过拟合，传统 PCA 可能更稳定。
+</div>
+
+<h2>六、方法学说明</h2>
+<pre>
+scVI (single-cell Variational Inference) was used for dimensionality
+reduction and batch correction. Highly variable genes (n=2000) were
+selected as input features. The VAE model was trained with a latent
+dimension of {{n_latent}} for up to {{n_epochs}} epochs with early
+stopping. The learned latent representation (X_scVI) was used for
+kNN graph construction and Leiden clustering. UMAP projection was
+used for visualization.
+</pre>
+
+<h2>七、参考资料</h2>
+<ul>
+  <li>Lopez R, et al. Deep generative modeling for single-cell transcriptomics. <em>Nat Methods</em>. 2018;15:1053-1058.</li>
+  <li><a href="https://docs.scvi-tools.org/">scvi-tools 官方文档</a></li>
+  <li><a href="https://biof3.com/docs/sc/scvi">BioF3 教程：scVI 降维</a></li>
+</ul>
+
+<div class="footer">
+  <p>BioF3 - AI 陪伴的全组学学习与实战平台 · <a href="https://biof3.com">biof3.com</a></p>
+  <p>本报告自动生成，仅供学习参考。</p>
+</div>
+
+</div>
+<script>document.querySelectorAll(".fig img").forEach(function(img){img.addEventListener("click",function(){this.classList.toggle("zoomed")})});</script>
+</body>
+</html>

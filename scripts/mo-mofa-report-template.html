@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MOFA2 多组学因子分析 - 结果解读报告 | BioF3</title>
+  <style>
+  :root { --text: #17201d; --muted: #5c6b64; --border: #dfe8e3; --surface: #f8faf9; --primary: #2e8555; --code-bg: #f4f7f5; --warn: #d97706; --info: #2563eb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: var(--text); font: 14px/1.72 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif; }
+  .report { max-width: 860px; padding: 40px 32px 60px; margin: 0 auto; margin-left: max(200px, calc(50% - 330px)); }
+  .report.full { margin-left: auto; margin-right: auto; }
+  .report-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 32px; position: relative; }
+  .report-header .eyebrow { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; }
+  .report-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .report-header .meta { font-size: 12px; color: var(--muted); }
+  h2 { font-size: 18px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; }
+  p { margin: 0 0 12px; } ul, ol { margin: 0 0 12px; padding-left: 22px; } li { margin-bottom: 4px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 6px; overflow-x: auto; margin: 0 0 16px; font-size: 13px; line-height: 1.5; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 13px; }
+  th, td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
+  th { background: var(--surface); font-weight: 600; }
+  .callout { padding: 14px 16px; border-radius: 6px; margin: 16px 0; font-size: 13px; }
+  .callout-info { background: #eff6ff; border-left: 3px solid var(--info); }
+  .callout-warn { background: #fffbeb; border-left: 3px solid var(--warn); }
+  .callout-tip { background: #ecfdf5; border-left: 3px solid var(--primary); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .fig { margin: 20px 0; text-align: center; }
+  .fig img { max-width: 55%; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.1); cursor: zoom-in; transition: transform .3s; } .fig img.zoomed { max-width: 100%; cursor: zoom-out; }
+  .fig-caption { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card .value { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .biof3-wm { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27200%27%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2728%27 font-weight=%27800%27 fill=%27%232e8555%27 opacity=%270.04%27 transform=%27rotate(-25 150 100)%27%3EBioF3%3C/text%3E%3Ctext x=%2750%25%27 y=%2770%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2710%27 font-weight=%27700%27 fill=%27%232e8555%27 opacity=%270.035%27 transform=%27rotate(-25 150 100)%27%3ESHENGXIN F3%3C/text%3E%3C/svg%3E"); }
+  .nav-wrap { position: fixed; left: 0; top: 0; bottom: 0; width: 200px; background: #f8faf9; border-right: 1px solid #dfe8e3; padding: 20px 12px; overflow-y: auto; font-size: 12px; z-index: 50; transition: transform .2s; box-shadow: 2px 0 8px rgba(0,0,0,.06); }
+  .nav-wrap.hidden { transform: translateX(-100%); box-shadow: none; }
+  .nav-toggle { position: fixed; left: 8px; top: 8px; z-index: 60; background: #fff; border: 1px solid #dfe8e3; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .nav-wrap .nav-title { font-weight: 700; font-size: 13px; margin-bottom: 12px; color: #2e8555; }
+  .nav-wrap a { display: block; padding: 4px 0; color: #5c6b64; text-decoration: none; line-height: 1.4; }
+  .nav-wrap a:hover { color: #2e8555; }
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<button class="nav-toggle" onclick="var n=document.querySelector('.nav-wrap'),r=document.querySelector('.report');n.classList.toggle('hidden');r.classList.toggle('full');this.textContent=n.classList.contains('hidden')?'☰':'✕'" title="切换目录">☰</button>
+<div class="biof3-wm" aria-hidden="true"></div>
+<nav class="nav-wrap" id="reportNav"><div class="nav-title">目录</div></nav>
+
+<div class="report">
+
+<header class="report-header">
+  <div class="eyebrow">BioF3 分析工具 · 结果解读报告</div>
+  <h1>MOFA2 多组学因子分析</h1>
+  <p class="meta">工具版本：MOFA2 (Bioconductor) · 报告模板 v1.0 · 生成于 BioF3 在线分析平台</p>
+</header>
+
+<!-- ============================================================ -->
+<h2>一、分析概览</h2>
+
+<p>本报告对 MOFA2（Multi-Omics Factor Analysis）的分析结果进行解读。MOFA2 是一种无监督的多组学整合方法，通过分解多个组学层共享的潜在因子，揭示跨组学的协同变异模式。与 iCluster 等方法相比，MOFA2 支持连续/计数/二分类数据，且能自动识别稀疏因子，是当前最灵活的多组学因子分解工具。</p>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="value">{{samples}}</div><div class="label">样本数</div></div>
+  <div class="stat-card"><div class="value">{{views}}</div><div class="label">组学层数</div></div>
+  <div class="stat-card"><div class="value">{{factors}}</div><div class="label">因子数</div></div>
+  <div class="stat-card"><div class="value">{{r2}}</div><div class="label">总方差解释</div></div>
+</div>
+
+<div class="callout callout-info">
+  <strong>MOFA2 的核心思想</strong>
+  <ul style="margin:0;padding-left:18px;">
+    <li><strong>潜在因子</strong>：从多组学数据中提取的隐藏变量，代表跨组学的协同信号</li>
+    <li><strong>共享 vs 特异</strong>：因子可在多组学层间共享（跨组学一致信号），也可仅在某一层特异</li>
+    <li><strong>稀疏性</strong>：通过 ARD 自动稀疏化，每个因子仅由少数特征驱动</li>
+    <li><strong>下游用途</strong>：因子得分可用于聚类、关联临床、缺失值填补</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2>二、方差解释热图</h2>
+
+<div class="fig">
+  <img src="{{variance_heatmap.png}}" alt="Variance Explained Heatmap">
+  <div class="fig-caption">图 1：各因子在各组学层的方差解释率热图。每行=一个因子，每列=一个组学层，色深=方差解释比例。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li><strong>深色行（多列都深）</strong>：该因子在多个组学层都有解释力 -> 跨组学共享因子</li>
+  <li><strong>仅单列深色</strong>：该因子仅在某一组学层活跃 -> 组学特异因子</li>
+  <li><strong>前几个因子方差解释率高</strong>：符合预期，前几个因子捕获主要变异</li>
+  <li>若某因子在所有层方差解释率都低 -> 可考虑减少因子数</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>三、各层总方差</h2>
+
+<div class="fig">
+  <img src="{{variance_total.png}}" alt="Total Variance per View">
+  <div class="fig-caption">图 2：各组学层被全部因子解释的总方差比例。反映该组学层与潜在因子的关联程度。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>方差解释率高的层 -> 该组学数据信号强，与潜在因子关联紧密</li>
+  <li>方差解释率低的层 -> 该组学数据噪声大或与其他组学关联弱</li>
+  <li>常见情况：mRNA/蛋白层方差解释率高于甲基化层</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>四、因子权重 Top 特征</h2>
+
+<div class="fig">
+  <img src="{{top_weights.png}}" alt="Top Weights">
+  <div class="fig-caption">图 3：各因子权重绝对值最大的 Top 特征。正权重（红）和负权重（蓝）代表该特征与因子正/负相关。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>高权重特征 -> 驱动该因子的核心变量</li>
+  <li>正/负权重的特征代表因子两极的生物学信号</li>
+  <li>对 top 特征做 GO/KEGG 富集，可注释该因子的生物学意义</li>
+  <li>若同一通路基因集中出现在某因子 -> 该因子代表此通路活性</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>五、因子散点图</h2>
+
+<div class="fig">
+  <img src="{{factor_scatter.png}}" alt="Factor Scatter">
+  <div class="fig-caption">图 4：样本在 Factor 1 vs Factor 2 空间的投影。每个点=一个样本，颜色=样本分组（如提供）。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>样本分群明显 -> 前两个因子捕获了主要的样本间差异</li>
+  <li>分组在因子空间分离 -> 该组学差异由这两个因子驱动</li>
+  <li>样本散乱无结构 -> 因子区分力不足，需看更多因子</li>
+  <li>因子散点可配合后续 consensus-cluster 做亚型发现</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>六、因子相关性</h2>
+
+<div class="fig">
+  <img src="{{factor_cor.png}}" alt="Factor Correlation">
+  <div class="fig-caption">图 5：因子间相关性热图。理想情况下因子应相互独立（相关性接近 0）。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>因子间相关性接近 0 -> MOFA2 分解成功，各因子独立</li>
+  <li>出现高相关因子对 -> 信息冗余，可考虑减少因子数</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>七、数据总览</h2>
+
+<div class="fig">
+  <img src="{{data_overview.png}}" alt="Data Overview">
+  <div class="fig-caption">图 6：各组学层数据总览，包括样本数、特征数、缺失率、分布。</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>八、输出数据文件</h2>
+
+<table>
+  <thead><tr><th>文件名</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><code>factor_scores.csv</code></td><td>样本×因子得分矩阵（核心输出）</td></tr>
+    <tr><td><code>variance_table.csv</code></td><td>方差分解表（因子×组学层）</td></tr>
+    <tr><td><code>data_overview.csv</code></td><td>数据总览表</td></tr>
+    <tr><td><code>variance_heatmap.png / .pdf</code></td><td>方差解释热图（双格式）</td></tr>
+    <tr><td><code>variance_total.png / .pdf</code></td><td>各层总方差（双格式）</td></tr>
+    <tr><td><code>top_weights.png / .pdf</code></td><td>因子权重（双格式）</td></tr>
+    <tr><td><code>factor_scatter.png / .pdf</code></td><td>因子散点图（双格式）</td></tr>
+    <tr><td><code>factor_cor.png / .pdf</code></td><td>因子相关性（双格式）</td></tr>
+    <tr><td><code>data_overview.png / .pdf</code></td><td>数据总览（双格式）</td></tr>
+    <tr><td><code>summary.txt</code></td><td>分析摘要</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2>九、下游分析建议</h2>
+
+<ol>
+  <li><strong>亚型发现</strong> - 将 factor_scores.csv 导入 consensus-cluster 做基于因子的亚型聚类</li>
+  <li><strong>生存分析</strong> - 用 km-survival 比较因子得分高低组的预后差异</li>
+  <li><strong>因子注释</strong> - 对 top 权重特征做 go-kegg / gsea 富集，注释因子生物学意义</li>
+  <li><strong>多组学对比</strong> - 与 mo-snf 的亚型结果对比，验证亚型跨方法一致性</li>
+  <li><strong>缺失填补</strong> - MOFA2 可用于多组学缺失数据的填补（高级用法）</li>
+</ol>
+
+<div class="callout callout-warn">
+  <strong>注意：组学层对齐</strong>
+  MOFA2 要求各组学层的样本必须对齐（行列一致）。若各层数据来自不同平台/批次，需先做批次校正。组学层数建议 2-4 层，层数过多会降低因子稳定性。
+</div>
+
+<!-- ============================================================ -->
+<h2>十、方法学说明（可用于论文 Methods）</h2>
+
+<pre>
+Multi-omics factor analysis was performed using the MOFA2
+R/Bioconductor package. The model was trained with 15 factors
+and slow convergence mode. ARD (Automatic Relevance
+Determination) was enabled on both factors and weights to
+achieve sparsity. The variance explained by each factor in
+each view was computed. Top weighted features per factor
+were extracted for biological annotation. Sample factor
+scores were used for downstream clustering and survival
+analysis.
+</pre>
+
+<!-- ============================================================ -->
+<h2>十一、参考资料</h2>
+
+<ul>
+  <li>Argelaguet R, et al. MOFA+: a statistical framework for comprehensive integration of multi-modal single-cell data. <em>Genome Biology</em>. 2020;21:111.</li>
+  <li>Argelaguet R, et al. Multi-Omics Factor Analysis-a framework for unsupervised integration of multi-omics data sets. <em>Mol Syst Biol</em>. 2018;14(6):e8124.</li>
+  <li><a href="https://biof3.com/docs/multi-omics/mofa">BioF3 教程：MOFA2 多组学整合</a></li>
+</ul>
+
+<div class="footer">
+  <p>本报告由 BioF3 在线分析平台自动生成，仅供学习参考。如需用于正式发表，请结合实际数据和实验设计进行调整。</p>
+  <p>BioF3 - AI 陪伴的全组学学习与实战平台 · <a href="https://biof3.com">biof3.com</a></p>
+</div>
+
+</div><!-- /.report -->
+<script>document.querySelectorAll(".fig img").forEach(function(img){img.addEventListener("click",function(){this.classList.toggle("zoomed")})});var nav=document.getElementById("reportNav");if(nav){document.querySelectorAll(".report h2").forEach(function(h,i){h.id=h.id||"s"+i;var a=document.createElement("a");a.href="#"+h.id;a.textContent=h.textContent;nav.appendChild(a)});}</script>
+</body>
+</html>

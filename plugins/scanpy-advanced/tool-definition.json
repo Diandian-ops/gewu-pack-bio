@@ -1,0 +1,186 @@
+{
+  "id": "scanpy-advanced",
+  "title": "Scanpy 高级分析",
+  "subtitle": "scRNA-seq 标准 高级分析管线 (QC → normalize → HVG → PCA → UMAP → Leiden → markers)",
+  "category": "single-cell",
+  "language": "python",
+  "description": "对 AnnData (.h5ad) 输入执行 Scanpy 1.9+ 标准单细胞分析流程: QC, total-counts normalization + log1p, highly variable genes, PCA, neighbors, UMAP, Leiden 聚类, 以及基于 rank_genes_groups 的 marker 检测。输出 figures + tables + report.html + 持久化 AnnData。",
+  "inputs": [
+    {
+      "id": "anndata_file",
+      "label": "AnnData 输入文件 (.h5ad)",
+      "type": "file",
+      "required": true,
+      "accept": ".h5ad"
+    },
+    {
+      "id": "min_genes",
+      "label": "每个细胞至少检出基因数",
+      "type": "number",
+      "default": 200,
+      "required": false,
+      "minimum": 1
+    },
+    {
+      "id": "min_cells",
+      "label": "每个基因至少在多少细胞中检出",
+      "type": "number",
+      "default": 3,
+      "required": false,
+      "minimum": 1
+    },
+    {
+      "id": "n_top_genes",
+      "label": "HVG 数量 (highly_variable_genes)",
+      "type": "number",
+      "default": 2000,
+      "required": false,
+      "minimum": 100
+    },
+    {
+      "id": "n_pcs",
+      "label": "PCA 主成分数量",
+      "type": "number",
+      "default": 30,
+      "required": false,
+      "minimum": 2,
+      "maximum": 100
+    },
+    {
+      "id": "n_neighbors",
+      "label": "k-NN 邻居数",
+      "type": "number",
+      "default": 15,
+      "required": false,
+      "minimum": 2
+    },
+    {
+      "id": "resolution",
+      "label": "Leiden 聚类 resolution",
+      "type": "number",
+      "default": 0.5,
+      "required": false,
+      "minimum": 0.1,
+      "maximum": 2.0
+    },
+    {
+      "id": "method",
+      "label": "Marker 检测方法",
+      "type": "select",
+      "default": "wilcoxon",
+      "options": ["wilcoxon", "logreg", "t-test", "t-test_overestim_var"],
+      "required": false
+    }
+  ],
+  "outputs": [
+    { "id": "preprocessed", "filename": "preprocessed.h5ad", "type": "data", "label": "预处理后 AnnData (含 PCA/UMAP/leiden)" },
+    { "id": "marker_genes", "filename": "marker_genes.csv", "type": "table", "label": "Marker 基因表" },
+    { "id": "qc_summary", "filename": "qc_summary.csv", "type": "table", "label": "QC 摘要表" },
+    { "id": "umap", "filename": "umap.png", "type": "plot", "label": "UMAP 可视化" },
+    { "id": "umap_clustered", "filename": "umap_clustered.png", "type": "plot", "label": "UMAP (按 leiden 着色)" },
+    { "id": "hvg_plot", "filename": "hvg_plot.png", "type": "plot", "label": "高变基因分布" },
+    { "id": "report", "filename": "report.html", "type": "report", "label": "分析报告" },
+    { "id": "manifest", "filename": "manifest.json", "type": "manifest", "label": "Job manifest" }
+  ],
+  "tutorialUrl": "/docs/single-cell/scanpy-advanced",
+  "demoDataUrl": "/demo-data/scanpy-advanced-demo",
+  "estimatedMinutes": 3,
+  "packages": ["scanpy", "anndata", "pandas", "numpy", "scipy", "matplotlib", "seaborn", "Pillow"],
+  "color": "#0ea5e9",
+  "reportUrl": "/exports/tools/scanpy-advanced/index.html",
+  "ipcChannel": "tools:invoke/scanpy-advanced",
+  "diagnostics": {
+    "stdout": "scanpy-advanced > 进度通过 progress.json 驱动",
+    "stderr": "preflight 失败 → exit 3 (missing-inputs); runtime 缺包 → exit 4 (runtime-not-ready); empty-result → exit 5",
+    "exitCodeMap": {
+      "0": "valid",
+      "3": "missing_required_file_inputs",
+      "4": "runtime_not_ready",
+      "5": "empty_result"
+    }
+  },
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少 .h5ad 输入文件",
+      "description": "job 目录未发现合法的 .h5ad (>1KB) 输入；上游应为 sample-metadata-validator 或 scanpy-cluster 链式产物。",
+      "recoverable": true,
+      "suggestedFix": "确认 anndata_file input 已绑定且文件 >1KB；或先跑 sample-metadata-validator / scanpy-cluster 链式上游产出。",
+      "detect": "未找到 h5ad 文件 \\| anndata_file missing \\| 缺少 h5ad"
+    },
+    {
+      "code": "runtime_not_ready",
+      "title": "Python 运行时缺包",
+      "description": "biof3-py-runtime 未装 scanpy / anndata / matplotlib 等核心包，或 Python 解释器不可达。",
+      "recoverable": true,
+      "suggestedFix": "先安装 biof3-py-runtime 1.0.0+ (含 scanpy>=1.9, anndata>=0.9)；或在平台设置确认 Python runtime 已 provision。",
+      "detect": "ImportError: No module named scanpy \\| ModuleNotFoundError \\| biof3-py-runtime 缺少依赖"
+    },
+    {
+      "code": "empty_result",
+      "title": "细胞/基因数过少",
+      "description": "QC 后样本/基因数不足以跑 UMAP/Leiden；属空结果 (empty-result)，脚本仍落盘 QC summary + placeholder PNG。",
+      "recoverable": true,
+      "suggestedFix": "降低 min_genes / min_cells 阈值；或换更大数据集；该结果不算 failed 任务。",
+      "detect": "细胞数过少 \\| QC 后样本.*过少 \\| insufficient cells"
+    }
+  ],
+  "resultStudio": {
+    "contractVersion": 1,
+    "descriptorVersion": 1,
+    "semanticType": "single_cell_clustering",
+    "entity": {
+      "type": "cell_clustering",
+      "idField": "cell_id",
+      "fields": {
+        "cell_id": "string",
+        "leiden": "string",
+        "umap_x": "number",
+        "umap_y": "number"
+      }
+    },
+    "source": {
+      "strategy": "execution_snapshot_per_artifact",
+      "entryPoint": "scripts/scanpy-advanced.py"
+    },
+    "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.py",
+    "inputBindings": [
+      {
+        "inputId": "anndata_file",
+        "required": true,
+        "acceptsArtifactTypes": ["data"],
+        "semanticRole": "single_cell_expression_matrix"
+      }
+    ],
+    "parameters": {
+      "min_genes": { "type": "number", "default": 200, "minimum": 1 },
+      "min_cells": { "type": "number", "default": 3, "minimum": 1 },
+      "n_top_genes": { "type": "number", "default": 2000, "minimum": 100 },
+      "n_pcs": { "type": "number", "default": 30, "minimum": 2, "maximum": 100 },
+      "n_neighbors": { "type": "number", "default": 15, "minimum": 2 },
+      "resolution": { "type": "number", "default": 0.5, "minimum": 0.1, "maximum": 2.0 },
+      "method": { "type": "select", "default": "wilcoxon", "options": ["wilcoxon", "logreg", "t-test", "t-test_overestim_var"] }
+    },
+    "parameterImpacts": {
+      "min_genes": "scientific",
+      "min_cells": "scientific",
+      "n_top_genes": "scientific",
+      "n_pcs": "scientific",
+      "n_neighbors": "scientific",
+      "resolution": "scientific",
+      "method": "scientific"
+    },
+    "actions": ["filter_cells", "rerun_clustering", "change_resolution", "recompute"],
+    "artifacts": [
+      { "id": "preprocessed", "type": "data", "filename": "preprocessed.h5ad", "interaction": "interactive" },
+      { "id": "marker_genes", "type": "table", "filename": "marker_genes.csv", "interaction": "interactive" },
+      { "id": "umap_clustered", "type": "plot", "filename": "umap_clustered.png", "interaction": "interactive" },
+      { "id": "report", "type": "report", "filename": "report.html", "interaction": "noninteractive" }
+    ],
+    "interactionMappings": [
+      { "artifactId": "preprocessed", "mode": "anndata", "entityType": "cell", "idField": "obs_name" },
+      { "artifactId": "marker_genes", "mode": "table", "entityType": "gene", "idField": "gene" },
+      { "artifactId": "umap_clustered", "mode": "plot", "entityType": "image" }
+    ]
+  }
+}

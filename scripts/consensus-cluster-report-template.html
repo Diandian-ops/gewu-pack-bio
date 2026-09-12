@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Consensus Clustering - 结果解读报告 | BioF3</title>
+  <style>
+  :root { --text: #17201d; --muted: #5c6b64; --border: #dfe8e3; --surface: #f8faf9; --primary: #2e8555; --code-bg: #f4f7f5; --warn: #d97706; --info: #2563eb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: var(--text); font: 14px/1.72 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif; }
+  .report { max-width: 860px; padding: 40px 32px 60px; margin: 0 auto; margin-left: max(200px, calc(50% - 330px)); }
+  .report.full { margin-left: auto; margin-right: auto; }
+  .report-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 32px; position: relative; }
+  .report-header .eyebrow { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; }
+  .report-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .report-header .meta { font-size: 12px; color: var(--muted); }
+  h2 { font-size: 18px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; }
+  p { margin: 0 0 12px; } ul, ol { margin: 0 0 12px; padding-left: 22px; } li { margin-bottom: 4px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 6px; overflow-x: auto; margin: 0 0 16px; font-size: 13px; line-height: 1.5; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 13px; }
+  th, td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
+  th { background: var(--surface); font-weight: 600; }
+  .callout { padding: 14px 16px; border-radius: 6px; margin: 16px 0; font-size: 13px; }
+  .callout-info { background: #eff6ff; border-left: 3px solid var(--info); }
+  .callout-warn { background: #fffbeb; border-left: 3px solid var(--warn); }
+  .callout-tip { background: #ecfdf5; border-left: 3px solid var(--primary); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .fig { margin: 20px 0; text-align: center; }
+  .fig img { max-width: 55%; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.1); cursor: zoom-in; transition: transform .3s; } .fig img.zoomed { max-width: 100%; cursor: zoom-out; }
+  .fig-caption { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card .value { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .biof3-wm { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27200%27%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2728%27 font-weight=%27800%27 fill=%27%232e8555%27 opacity=%270.04%27 transform=%27rotate(-25 150 100)%27%3EBioF3%3C/text%3E%3Ctext x=%2750%25%27 y=%2770%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2710%27 font-weight=%27700%27 fill=%27%232e8555%27 opacity=%270.035%27 transform=%27rotate(-25 150 100)%27%3ESHENGXIN F3%3C/text%3E%3C/svg%3E"); }
+  .nav-wrap { position: fixed; left: 0; top: 0; bottom: 0; width: 200px; background: #f8faf9; border-right: 1px solid #dfe8e3; padding: 20px 12px; overflow-y: auto; font-size: 12px; z-index: 50; transition: transform .2s; box-shadow: 2px 0 8px rgba(0,0,0,.06); }
+  .nav-wrap.hidden { transform: translateX(-100%); box-shadow: none; }
+  .nav-toggle { position: fixed; left: 8px; top: 8px; z-index: 60; background: #fff; border: 1px solid #dfe8e3; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .nav-wrap .nav-title { font-weight: 700; font-size: 13px; margin-bottom: 12px; color: #2e8555; }
+  .nav-wrap a { display: block; padding: 4px 0; color: #5c6b64; text-decoration: none; line-height: 1.4; }
+  .nav-wrap a:hover { color: #2e8555; }
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<button class="nav-toggle" onclick="var n=document.querySelector('.nav-wrap'),r=document.querySelector('.report');n.classList.toggle('hidden');r.classList.toggle('full');this.textContent=n.classList.contains('hidden')?'☰':'✕'" title="切换目录">☰</button>
+<div class="biof3-wm" aria-hidden="true"></div>
+<nav class="nav-wrap" id="reportNav"><div class="nav-title">目录</div></nav>
+
+<div class="report">
+
+<header class="report-header">
+  <div class="eyebrow">BioF3 分析工具 · 结果解读报告</div>
+  <h1>Consensus Clustering（共识聚类亚型发现）</h1>
+  <p class="meta">工具版本：ConsensusClusterPlus / NMF / mclust · 报告模板 v1.0 · 生成于 BioF3 在线分析平台</p>
+</header>
+
+<!-- ============================================================ -->
+<h2>一、分析概览</h2>
+
+<p>本报告对 Consensus Clustering 的结果进行解读。共识聚类通过多次重采样（subsampling）+ 重复聚类 + 投票共识，评估聚类结果的稳定性，是肿瘤亚型发现的金标准方法。本工具遍历 k=2 到 max_k，自动选择最优 k 并验证聚类质量。</p>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="value">{{samples}}</div><div class="label">样本数</div></div>
+  <div class="stat-card"><div class="value">{{features}}</div><div class="label">特征数</div></div>
+  <div class="stat-card"><div class="value">{{optimal_k}}</div><div class="label">最优 k</div></div>
+  <div class="stat-card"><div class="value">{{distance}}</div><div class="label">距离度量</div></div>
+</div>
+
+<div class="callout callout-info">
+  <strong>最优 k 选择策略</strong>
+  <ul style="margin:0;padding-left:18px;">
+    <li><strong>Δarea 法</strong>：计算 CDF 曲线下面积的相对变化（delta area），选择曲线趋于平缓的拐点</li>
+    <li><strong>Silhouette 法</strong>：选轮廓系数最高的 k</li>
+    <li>二者交叉验证，取共识。生物意义也需考虑（如已知亚型数）</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2>二、CDF 累积分布图</h2>
+
+<div class="fig">
+  <img src="{{cdf_plot.png}}" alt="CDF Plot">
+  <div class="fig-caption">图 1：共识矩阵的 CDF（累积分布函数）图。展示不同 k 值下共识值的分布。曲线越陡峭（集中在 0/1 两端），聚类越稳定。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>曲线集中在 0 和 1 附近（陡峭 S 型）-> 样本对聚类归属高度确定</li>
+  <li>曲线平缓过渡 -> 存在大量"模糊"样本，聚类不稳定</li>
+  <li>随 k 增大，CDF 曲线应逐渐变陡（更稳定），但 k 过大会过拟合</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>三、Δarea 图（最优 k 选择）</h2>
+
+<div class="fig">
+  <img src="{{delta_area.png}}" alt="Delta Area">
+  <div class="fig-caption">图 2：Delta area 图。横轴=k，纵轴=CDF 面积的相对变化量。曲线趋于水平时的 k 即"拐点"，再加 k 收益递减。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>曲线在某个 k 后明显变平缓 -> 该 k 为最优（再加一个亚型收益不大）</li>
+  <li>若无明显拐点 -> 聚类结构不强，数据可能无明显亚型</li>
+  <li>结合 Silhouette 和生物学意义综合判断</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>四、一致性矩阵热图</h2>
+
+<div class="fig">
+  <img src="{{consensus_matrices.png}}" alt="Consensus Matrices">
+  <div class="fig-caption">图 3：各 k 值的一致性矩阵热图。每个格子颜色表示两样本被分到同一簇的频率（0-1）。理想状态下对角线方块为深红（=1），方块外为白色（=0）。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li><strong>清晰方块</strong>：对角线上有明显的深色方块 -> 聚类稳定</li>
+  <li><strong>模糊边界</strong>：方块边界有渐变 -> 部分样本归属不确定</li>
+  <li><strong>噪点</strong>：方块外仍有零星深色 -> 噪声或过渡态样本</li>
+  <li>选定的最优 k 对应的矩阵应呈现最清晰的方块结构</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>五、Silhouette Score</h2>
+
+<div class="fig">
+  <img src="{{silhouette.png}}" alt="Silhouette">
+  <div class="fig-caption">图 4：各 k 值的 Silhouette 轮廓系数。衡量每个样本与其所属簇的紧密程度，范围 [-1, 1]，越大越好。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>Silhouette &gt; 0.5 -> 聚类结构良好</li>
+  <li>0.25-0.5 -> 结构较弱但可接受</li>
+  <li>&lt;0.25 -> 聚类结构不明显</li>
+  <li>若某 k 值 Silhouette 突然下降 -> 可能出现了不合理的亚型划分</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>六、PCA 亚型投影</h2>
+
+<div class="fig">
+  <img src="{{pca_projection.png}}" alt="PCA Projection">
+  <div class="fig-caption">图 5：PCA 二维投影，按亚型着色。直观展示各亚型在主成分空间中的分离程度。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>各亚型点团明显分离 -> 亚型间差异大，聚类有效</li>
+  <li>亚型有重叠 -> 部分样本特征相近，需结合其他证据</li>
+  <li>PC1/PC2 解释方差比例低 -> 数据维度高，二维投影信息有限</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>七、输出数据文件</h2>
+
+<table>
+  <thead><tr><th>文件名</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><code>subtype_assignment.csv</code></td><td>样本-亚型对应表（核心输出）</td></tr>
+    <tr><td><code>metrics.csv</code></td><td>CDF + delta area 指标表</td></tr>
+    <tr><td><code>silhouette.csv</code></td><td>各 k 值 Silhouette 得分</td></tr>
+    <tr><td><code>ari_validation.txt</code></td><td>ARI 验证（如提供已知标签）</td></tr>
+    <tr><td><code>cdf_plot.png / .pdf</code></td><td>CDF 图（双格式）</td></tr>
+    <tr><td><code>delta_area.png / .pdf</code></td><td>Δarea 图（双格式）</td></tr>
+    <tr><td><code>consensus_matrices.png / .pdf</code></td><td>一致性矩阵热图（双格式）</td></tr>
+    <tr><td><code>silhouette.png / .pdf</code></td><td>Silhouette 图（双格式）</td></tr>
+    <tr><td><code>pca_projection.png / .pdf</code></td><td>PCA 投影图（双格式）</td></tr>
+    <tr><td><code>summary.txt</code></td><td>分析摘要</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2>八、下游分析建议</h2>
+
+<ol>
+  <li><strong>亚型间差异分析</strong> - 用 deseq2 / 差异分析比较各亚型的特征基因差异</li>
+  <li><strong>生存分析</strong> - 用 km-survival 工具比较各亚型的预后差异，验证亚型临床意义</li>
+  <li><strong>富集分析</strong> - 对各亚型 marker 基因做 go-kegg / gsea 富集，理解亚型生物学特征</li>
+  <li><strong>有监督建模</strong> - 将亚型作为 label，用 ml-classifier 训练分类器，用于新样本亚型预测</li>
+  <li><strong>多组学整合</strong> - 若有多层组学，可用 mo-snf / mo-mofa 做多组学联合聚类，验证亚型跨组学一致性</li>
+</ol>
+
+<div class="callout callout-warn">
+  <strong>注意：无监督聚类的局限</strong>
+  Consensus Clustering 是探索性方法，"最优 k"是数学上的拐点，不一定有生物学意义。必须结合生存差异、marker 基因、已有文献等多维度验证亚型的真实性和临床意义。
+</div>
+
+<!-- ============================================================ -->
+<h2>九、方法学说明（可用于论文 Methods）</h2>
+
+<pre>
+Consensus clustering was performed using the
+ConsensusClusterPlus package in R. The expression matrix was
+subsamplingd at 80% (pItem=0.8) with 50 repetitions (reps=50)
+for each k from 2 to max_k. Hierarchical clustering (hc) with
+Pearson distance was used as the cluster algorithm. The
+optimal k was determined by the delta area method (relative
+change in CDF area) and validated by silhouette scores.
+Sample-to-subtype assignments were extracted from the
+consensus matrix at the optimal k.
+</pre>
+
+<!-- ============================================================ -->
+<h2>十、参考资料</h2>
+
+<ul>
+  <li>Monti S, et al. Consensus Clustering: A Resampling-Based Method for Class Discovery and Visualization of Gene Expression Microarray Data. <em>Machine Learning</em>. 2003;52(1-2):91-118.</li>
+  <li>Wilkerson MD, Hayes DN. ConsensusClusterPlus: a class discovery tool with confidence testing and assessment of biological relevance. <em>Bioinformatics</em>. 2010;26(21):2750-2751.</li>
+  <li>Rousseeuw PJ. Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. <em>JCAM</em>. 1987;20:53-65.</li>
+  <li><a href="https://biof3.com/docs/ml/module05">BioF3 教程：无监督亚型发现</a></li>
+</ul>
+
+<div class="footer">
+  <p>本报告由 BioF3 在线分析平台自动生成，仅供学习参考。如需用于正式发表，请结合实际数据和实验设计进行调整。</p>
+  <p>BioF3 - AI 陪伴的全组学学习与实战平台 · <a href="https://biof3.com">biof3.com</a></p>
+</div>
+
+</div><!-- /.report -->
+<script>document.querySelectorAll(".fig img").forEach(function(img){img.addEventListener("click",function(){this.classList.toggle("zoomed")})});var nav=document.getElementById("reportNav");if(nav){document.querySelectorAll(".report h2").forEach(function(h,i){h.id=h.id||"s"+i;var a=document.createElement("a");a.href="#"+h.id;a.textContent=h.textContent;nav.appendChild(a)});}</script>
+</body>
+</html>

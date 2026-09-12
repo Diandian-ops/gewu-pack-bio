@@ -1,0 +1,117 @@
+{
+  "id": "gsea",
+  "title": "GSEA 基因集富集分析",
+  "subtitle": "全基因组排序基因集富集",
+  "category": "bulk RNA-seq",
+  "language": "r",
+  "supportedPlatforms": ["macos-arm64"],
+  "description": "Gene Set Enrichment Analysis：基于全基因组排序（log2FC/score）的基因集富集，支持 GO-BP / KEGG（离线数据）/ Hallmark，无需预设显著阈值。上游可接 DESeq2 差异表达结果（二跳绑定）。",
+  "inputs": [
+    {
+      "id": "deg_table",
+      "label": "排序基因列表或差异分析结果表 (CSV)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv",
+      "hint": "两列排序列表（SYMBOL/ENTREZID + log2FC/score）或含 gene/log2FoldChange 的 DESeq2/limma 结果表（可由差异分析步骤二跳绑定）；GSEA 需 ≥100 个可映射基因，不要预先按显著性筛选"
+    },
+    {
+      "id": "organism",
+      "label": "物种",
+      "type": "select",
+      "default": "hsa",
+      "options": ["hsa", "mmu"],
+      "hint": "首期预构建覆盖 human(hsa/org.Hs) 与 mouse(mmu/org.Mm)"
+    },
+    {
+      "id": "gene_set",
+      "label": "基因集",
+      "type": "select",
+      "default": "GO_BP",
+      "options": ["GO_BP", "KEGG", "Hallmark"],
+      "hint": "GO_BP=GO 生物过程；KEGG=通路（离线内置数据）；Hallmark=MSigDB H 集合"
+    },
+    {
+      "id": "min_size",
+      "label": "最小基因集大小",
+      "type": "number",
+      "default": 15
+    },
+    {
+      "id": "max_size",
+      "label": "最大基因集大小",
+      "type": "number",
+      "default": 500
+    },
+    {
+      "id": "gene_id_type",
+      "label": "gene ID 类型",
+      "type": "text",
+      "required": false,
+      "default": "symbol",
+      "hint": "symbol | ensembl | entrez"
+    }
+  ],
+  "outputs": [
+    { "id": "gsea_results", "type": "table", "label": "GSEA 结果表" },
+    { "id": "gsea_dotplot", "type": "plot", "label": "GSEA 气泡图" },
+    { "id": "gsea_waterfall", "type": "plot", "label": "NES Waterfall 图" },
+    { "id": "summary", "type": "text", "label": "分析摘要" },
+    { "id": "report", "type": "report", "label": "解读报告" }
+  ],
+  "tutorialUrl": "/docs/bulk-rnaseq/gsea",
+  "demoDataUrl": "/demo-data/gsea",
+  "estimatedMinutes": 4,
+  "packages": ["clusterProfiler", "enrichplot", "DOSE", "msigdbr", "org.Hs.eg.db", "KEGGREST"],
+  "color": "#0891b2",
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少输入基因文件",
+      "description": "GSEA 需要一个排序基因列表或差异表达结果表；缺少输入无法继续。",
+      "recoverable": true,
+      "suggestedFix": "让 Harness 从项目中选择上游差异结果（deg_table），或提供两列排序列表。",
+      "detect": "No input gene file found|missing required file inputs|please provide file"
+    },
+    {
+      "code": "insufficient_ranked_genes",
+      "title": "排序基因过少",
+      "description": "GSEA 依赖全基因组排序，有效基因少于 100 个会导致统计不可靠。",
+      "recoverable": true,
+      "suggestedFix": "提供覆盖全表达谱的排序列表（≥100 个基因），不要预先按显著性筛选。",
+      "detect": "Too few genes|need >= 100|Input must have"
+    },
+    {
+      "code": "gene_id_mapping_failed",
+      "title": "基因 ID 映射失败",
+      "description": "SYMBOL → ENTREZID 转换失败或匹配率过低，通常是物种或 ID 类型不符。",
+      "recoverable": true,
+      "suggestedFix": "确认输入基因为对应物种的 SYMBOL 或 ENTREZID，并核对 organism 参数（hsa/mmu）。",
+      "detect": "Gene ID mapping failed|bitr|ENTREZID|Converted: .* 0|no gene can be mapped"
+    },
+    {
+      "code": "organism_db_missing",
+      "title": "物种注释数据库未就绪",
+      "description": "org.Hs.eg.db / org.Mm.eg.db、离线 KEGG 数据或 msigdbr 未随 r-enrichment 分析包就位。",
+      "recoverable": true,
+      "suggestedFix": "由 Harness 自动补齐 r-enrichment 分析包（含物种 org.db、离线 KEGG 数据与 msigdbr）后重试。",
+      "detect": "there is no package|could not find function|org.Hs.eg.db|org.Mm.eg.db|offline KEGG snapshot|KEGG REST|msigdbr"
+    },
+    {
+      "code": "no_enriched_gene_sets",
+      "title": "无显著富集基因集",
+      "description": "在当前阈值下没有基因集达到显著富集，属正常生物学结果而非执行错误。",
+      "recoverable": true,
+      "suggestedFix": "可放宽基因集大小范围，或确认排序指标（log2FC）方向与量级合理；空结果也会正常产出摘要。",
+      "detect": "No significantly enriched gene sets|n_enriched.*0|0 enriched"
+    },
+    {
+      "code": "runtime_not_ready",
+      "title": "运行时不可用",
+      "description": "R 运行时或 r-enrichment 分析包未就绪，无法执行 GSEA。",
+      "recoverable": true,
+      "suggestedFix": "Harness 将自动准备所需运行时与分析包，完成后继续执行。",
+      "detect": "runtime not ready|r runtime not found|rscript not found|r_runtime_not_found"
+    }
+  ]
+}

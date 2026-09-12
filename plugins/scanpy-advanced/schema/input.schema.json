@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "biof3://plugins/scanpy-advanced/input.schema.json",
+  "title": "scanpy-advanced input schema",
+  "description": "JSON schema for params.json passed to scanpy-advanced.py via BioF3 dispatcher. Compatible with biof3-py-runtime scanpy>=1.9.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["anndata_file"],
+  "properties": {
+    "anndata_file": {
+      "type": "string",
+      "description": "Path to .h5ad file (relative to jobDir or absolute). Must exist and be >1KB."
+    },
+    "min_genes": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 200,
+      "description": "sc.pp.filter_cells(min_genes) threshold; cells with fewer genes are dropped."
+    },
+    "min_cells": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 3,
+      "description": "sc.pp.filter_genes(min_cells) threshold; genes detected in fewer cells are dropped."
+    },
+    "n_top_genes": {
+      "type": "integer",
+      "minimum": 100,
+      "default": 2000,
+      "description": "sc.pp.highly_variable_genes(n_top_genes) — number of HVGs to flag."
+    },
+    "n_pcs": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 100,
+      "default": 30,
+      "description": "sc.tl.pca(n_comps) — auto-clamped to min(n_obs-1, n_vars-1)."
+    },
+    "n_neighbors": {
+      "type": "integer",
+      "minimum": 2,
+      "default": 15,
+      "description": "sc.pp.neighbors(n_neighbors) for the k-NN graph."
+    },
+    "resolution": {
+      "type": "number",
+      "minimum": 0.1,
+      "maximum": 2.0,
+      "default": 0.5,
+      "description": "sc.tl.leiden(resolution) — controls cluster granularity."
+    },
+    "leiden_key": {
+      "type": "string",
+      "default": "leiden",
+      "description": "obs column key under which Leiden labels are stored."
+    },
+    "method": {
+      "type": "string",
+      "enum": ["wilcoxon", "logreg", "t-test", "t-test_overestim_var"],
+      "default": "wilcoxon",
+      "description": "sc.tl.rank_genes_groups(method) — statistical test for marker genes."
+    }
+  }
+}

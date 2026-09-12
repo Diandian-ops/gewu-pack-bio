@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "gene-correlation",
+  "pluginVersion": "1.0.0",
+  "descriptorVersion": 1,
+  "sourceScriptSha256": "6d4806556b99ca903cdc47bb038e97448eed711344015ae856a1986cd6de762c",
+  "inputBindingDigest": "73ad061f099c715aef49870003f7eeab21771cf4cdfde4cedf3e15021b5ee067",
+  "artifactContractDigest": "a9b68c4951cab6a6eecfce77ebc4a90513a419e64863297233fb5d6840a5b18d",
+  "revisionSourceStrategy": "execution_snapshot_per_artifact",
+  "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
+  "fixtureInput": "demo-data/demo_expr.csv",
+  "expectedArtifactIds": ["heatmap", "corr_matrix"]
+}

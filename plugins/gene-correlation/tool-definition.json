@@ -1,0 +1,189 @@
+{
+  "id": "gene-correlation",
+  "title": "基因相关性热图",
+  "subtitle": "共表达分析",
+  "category": "功能富集",
+  "language": "r",
+  "description": "计算 top N 基因的相关性热图",
+  "inputs": [
+    {
+      "id": "expr_matrix",
+      "label": "表达矩阵 (CSV: 行=基因, 列=样本)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv"
+    },
+    {
+      "id": "top_n",
+      "label": "选取方差 top N 基因",
+      "type": "number",
+      "default": 30,
+      "hint": "按方差排序取前 N 个基因计算相关性，默认 30"
+    },
+    {
+      "id": "method",
+      "label": "相关系数方法",
+      "type": "select",
+      "default": "pearson",
+      "options": [
+        {
+          "value": "pearson",
+          "label": "Pearson（线性相关）"
+        },
+        {
+          "value": "spearman",
+          "label": "Spearman（秩相关）"
+        }
+      ]
+    },
+    {
+      "id": "color_low",
+      "label": "低相关颜色",
+      "type": "text",
+      "default": "#2563eb",
+      "hint": "仅影响呈现"
+    },
+    {
+      "id": "color_mid",
+      "label": "零相关颜色",
+      "type": "text",
+      "default": "#ffffff",
+      "hint": "仅影响呈现"
+    },
+    {
+      "id": "color_high",
+      "label": "高相关颜色",
+      "type": "text",
+      "default": "#dc2626",
+      "hint": "仅影响呈现"
+    },
+    {
+      "id": "cluster_rows",
+      "label": "按行聚类展示",
+      "type": "boolean",
+      "default": true,
+      "hint": "仅改变热图排列，不重算相关矩阵"
+    },
+    {
+      "id": "cluster_cols",
+      "label": "按列聚类展示",
+      "type": "boolean",
+      "default": true,
+      "hint": "仅改变热图排列，不重算相关矩阵"
+    },
+    {
+      "id": "show_correlation_values",
+      "label": "显示相关系数注释",
+      "type": "boolean",
+      "default": false,
+      "hint": "仅影响呈现"
+    },
+    {
+      "id": "base_font_size",
+      "label": "热图字号",
+      "type": "number",
+      "default": 8,
+      "hint": "仅影响呈现"
+    }
+  ],
+  "outputs": [
+    {
+      "id": "heatmap",
+      "filename": "heatmap.png",
+      "type": "plot",
+      "label": "相关性热图"
+    },
+    {
+      "id": "corr_matrix",
+      "filename": "corr_matrix.csv",
+      "type": "table",
+      "label": "相关系数矩阵"
+    }
+  ],
+  "resultStudio": {
+    "contractVersion": 1,
+    "descriptorVersion": 1,
+    "semanticType": "gene_correlation_heatmap",
+    "entity": { "type": "gene_pair_correlation", "idField": "gene_pair", "fields": { "gene_pair": "string", "gene_x": "string", "gene_y": "string", "correlation": "number" } },
+    "source": { "strategy": "execution_snapshot_per_artifact", "entryPoint": "scripts/gene-correlation.R" },
+    "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
+    "inputBindings": [{ "inputId": "expr_matrix", "required": true, "acceptsArtifactTypes": ["table"], "semanticRole": "expression_matrix" }],
+    "parameters": {
+      "top_n": { "type": "number", "default": 30, "minimum": 2 },
+      "method": { "type": "select", "default": "pearson", "options": ["pearson", "spearman"] },
+      "color_low": { "type": "text", "default": "#2563eb" },
+      "color_mid": { "type": "text", "default": "#ffffff" },
+      "color_high": { "type": "text", "default": "#dc2626" },
+      "cluster_rows": { "type": "boolean", "default": true },
+      "cluster_cols": { "type": "boolean", "default": true },
+      "show_correlation_values": { "type": "boolean", "default": false },
+      "base_font_size": { "type": "number", "default": 8, "minimum": 4, "maximum": 24 }
+    },
+    "parameterImpacts": {
+      "top_n": "data",
+      "method": "scientific",
+      "color_low": "presentation",
+      "color_mid": "presentation",
+      "color_high": "presentation",
+      "cluster_rows": "presentation",
+      "cluster_cols": "presentation",
+      "show_correlation_values": "presentation",
+      "base_font_size": "presentation"
+    },
+    "actions": ["select_gene_pairs", "derive_gene_set", "recompute"],
+    "artifacts": [
+      { "id": "heatmap", "type": "plot", "filename": "heatmap.png", "interaction": "interactive" },
+      { "id": "corr_matrix", "type": "table", "filename": "corr_matrix.csv", "interaction": "interactive" }
+    ],
+    "interactionMappings": [
+      { "artifactId": "corr_matrix", "mode": "matrix", "dataArtifactId": "corr_matrix", "entityType": "gene", "rowIdField": "row_id", "rowEntityType": "gene", "columnEntityType": "gene" },
+      { "artifactId": "heatmap", "mode": "matrix", "dataArtifactId": "corr_matrix", "entityType": "gene", "rowIdField": "row_id", "rowEntityType": "gene", "columnEntityType": "gene" }
+    ],
+    "validator": { "id": "gene_correlation_result_truth_v1", "checks": ["artifact_truth_valid", "script_sha256", "input_sha256", "output_sha256", "symmetric_matrix"] },
+    "goldenFixture": { "path": "golden-revisions/result-studio-v1.json" },
+    "upgradePolicy": { "sameMajor": "compatible_if_contract_digests_match", "contractDrift": "migration_required", "missingMigration": "read_only_legacy" }
+  },
+  "failureModes": [
+    {
+      "code": "non_numeric_expression_matrix",
+      "title": "表达矩阵包含非数值列",
+      "description": "相关性计算需要可解析的数值矩阵；如果混入样本 ID、注释列或文本列，会导致相关矩阵错误。",
+      "recoverable": true,
+      "suggestedFix": "去掉非数值列，仅保留基因表达数值区域，必要时由 Harness 自动剔除首列样本名。",
+      "detect": "non numeric expression matrix|non-numeric columns|numeric columns"
+    },
+    {
+      "code": "insufficient_numeric_genes",
+      "title": "可计算基因数量不足",
+      "description": "可用于相关性计算的数值基因少于 2 个时，无法生成相关性矩阵。",
+      "recoverable": false,
+      "suggestedFix": "检查表达矩阵格式或更换输入文件，确保至少有 2 个可计算基因。",
+      "detect": "insufficient numeric genes|fewer than 2 genes|too few numeric genes"
+    },
+    {
+      "code": "matrix_orientation_mismatch",
+      "title": "表达矩阵方向不符合预期",
+      "description": "插件预期 CSV 行为基因、列为样本；如果用户提供行=样本、列=基因，会导致相关性对象错误。",
+      "recoverable": true,
+      "suggestedFix": "文件探测层根据首列和列名数量判断方向，必要时自动转置或请求用户确认。",
+      "detect": "matrix orientation mismatch|rows_are_samples|transpose"
+    },
+    {
+      "code": "low_variance_expression",
+      "title": "表达矩阵方差过低",
+      "description": "可用于相关性排序的基因虽然数量足够，但整体方差太低，热图容易退化成近似常数矩阵。",
+      "recoverable": true,
+      "suggestedFix": "优先扩大 top_n 或改用更有变化的基因子集；如果原始矩阵整体低变异，建议更换分析对象。",
+      "detect": "low variance|constant expression|near zero variance|all zero variance"
+    },
+    {
+      "code": "top_n_too_large",
+      "title": "top N 超过可用基因数",
+      "description": "top_n 大于有效基因数时，仍可降级使用全部有效基因。",
+      "recoverable": true,
+      "suggestedFix": "将 top_n 自动裁剪到有效基因数，并在结果报告中记录修正。",
+      "detect": "top_n too large|clamp top_n|top n exceeds available genes"
+    }
+  ],
+  "estimatedMinutes": 2
+}

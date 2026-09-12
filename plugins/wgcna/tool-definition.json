@@ -1,0 +1,125 @@
+{
+  "id": "wgcna",
+  "title": "WGCNA 共表达网络",
+  "subtitle": "加权基因共表达网络分析",
+  "category": "bulk RNA-seq",
+  "language": "r",
+  "supportedPlatforms": ["macos-arm64"],
+  "description": "WGCNA 标准流程（Tutorial I）：QC → 软阈值 → 网络构建 → 模块识别 → 模块-性状关联 → Hub 基因 → GS-MM 散点。输入表达矩阵 + 数值型性状表；输出模块划分、模块-性状热图与 Hub 基因，可将模块基因子集接入下游 GO/KEGG 富集（二跳绑定）。",
+  "inputs": [
+    {
+      "id": "expression",
+      "label": "表达矩阵 (CSV/TSV)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv,.tsv,.txt",
+      "hint": "行=基因, 列=样本; 值为 log2(TPM+1) / log2(FPKM+1) / 标准化 log RSEM。上限 10000 基因 × 500 样本，建议先筛高变基因"
+    },
+    {
+      "id": "traits",
+      "label": "性状矩阵 (CSV/TSV)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv,.tsv,.txt",
+      "hint": "行=样本（与表达矩阵列名对应）, 列=数值型性状; 分类变量需预先编码为 0/1"
+    },
+    {
+      "id": "min_module_size",
+      "label": "最小模块大小",
+      "type": "number",
+      "default": 30,
+      "hint": "官方默认 30；小数据集可降到 20"
+    },
+    {
+      "id": "merge_cut_height",
+      "label": "Merge 高度",
+      "type": "number",
+      "default": 0.25,
+      "hint": "合并相似模块的高度阈值，越小模块越多越细；官方默认 0.25"
+    },
+    {
+      "id": "network_type",
+      "label": "网络类型",
+      "type": "select",
+      "default": "signed",
+      "options": ["signed", "unsigned"],
+      "hint": "signed 区分正负相关，生物学意义更强；官方推荐 signed"
+    },
+    {
+      "id": "soft_power",
+      "label": "软阈值 power（可选）",
+      "type": "number",
+      "hint": "留空则自动用 pickSoftThreshold 找 R² ≥ 0.85 的最小 power"
+    }
+  ],
+  "outputs": [
+    { "id": "sample_dendrogram", "type": "plot", "label": "样本聚类树（QC）" },
+    { "id": "soft_threshold", "type": "plot", "label": "软阈值选择图" },
+    { "id": "gene_dendrogram", "type": "plot", "label": "基因聚类 + 模块颜色" },
+    { "id": "module_size_barplot", "type": "plot", "label": "模块大小" },
+    { "id": "module_trait_heatmap", "type": "plot", "label": "模块-性状热图" },
+    { "id": "gs_mm_scatter", "type": "plot", "label": "GS vs MM 散点（最显著模块）" },
+    { "id": "module_assignment", "type": "table", "label": "基因 → 模块表" },
+    { "id": "module_trait_corr", "type": "table", "label": "模块-性状相关性表" },
+    { "id": "hub_genes", "type": "table", "label": "Hub 基因表" },
+    { "id": "sft_results", "type": "table", "label": "pickSoftThreshold 结果" },
+    { "id": "gs_mm_data", "type": "table", "label": "GS / MM 数据" },
+    { "id": "summary", "type": "text", "label": "分析摘要" },
+    { "id": "report", "type": "report", "label": "解读报告" }
+  ],
+  "tutorialUrl": "/docs/integration/module04",
+  "demoDataUrl": "/demo-data/wgcna",
+  "estimatedMinutes": 3,
+  "packages": ["WGCNA", "flashClust", "impute", "ggplot2", "dplyr"],
+  "color": "#0891b2",
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少输入文件",
+      "description": "WGCNA 需要表达矩阵 + 数值型性状表两个文件，缺一不可。",
+      "recoverable": true,
+      "suggestedFix": "让 Harness 从项目中选择上游表达矩阵与性状表，或使用示例数据。",
+      "detect": "No expression file found|No traits file found|missing required file inputs|please provide file"
+    },
+    {
+      "code": "dataset_too_large",
+      "title": "数据集超出上限",
+      "description": "输入超过 10000 基因 × 500 样本，桌面端 WGCNA 无法在合理资源内完成。",
+      "recoverable": true,
+      "suggestedFix": "先筛选高变基因（top variance），把矩阵降到 10000 基因 × 500 样本以内后重试。",
+      "detect": "Dataset too large|exceeds the 10000|Pre-filter to high-variance"
+    },
+    {
+      "code": "insufficient_samples",
+      "title": "共享样本过少",
+      "description": "表达矩阵列名与性状表行名匹配到的样本少于 15 个，WGCNA 相关性不可靠。",
+      "recoverable": true,
+      "suggestedFix": "确认表达矩阵列名与性状表行名一致，样本数需 ≥15。",
+      "detect": "shared between expression and traits|need at least 15|Only .* samples"
+    },
+    {
+      "code": "non_numeric_traits",
+      "title": "性状包含非数值列",
+      "description": "性状表存在非数值列，无法参与模块-性状相关性计算。",
+      "recoverable": true,
+      "suggestedFix": "把分类性状预先编码为 0/1（或数值），删除文本列后重试。",
+      "detect": "Traits must be numeric|Non-numeric columns|Encode categorical"
+    },
+    {
+      "code": "no_modules_detected",
+      "title": "未检测到有效模块",
+      "description": "在当前参数下只检出不足 2 个非 grey 模块，无法开展下游模块-性状分析。",
+      "recoverable": true,
+      "suggestedFix": "降低 min_module_size 或 merge_cut_height，或确认输入为高变基因子集。",
+      "detect": "non-grey module|Only .* module detected|Try lowering min_module_size"
+    },
+    {
+      "code": "runtime_not_ready",
+      "title": "运行时不可用",
+      "description": "R 运行时或 r-wgcna 分析包（WGCNA / impute / flashClust）未就绪，无法执行。",
+      "recoverable": true,
+      "suggestedFix": "由 Harness 自动准备 r-wgcna 分析包与 R 运行时，完成后继续执行。",
+      "detect": "runtime not ready|r runtime not found|rscript not found|there is no package|could not find function|library\\(WGCNA\\)"
+    }
+  ]
+}

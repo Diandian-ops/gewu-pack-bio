@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "cellchat",
+  "pluginVersion": "1.0.0",
+  "policy": "biocmanager-install-required",
+  "notes": "CellChat 不在 biof3-r-runtime 显式清单（r-runtime-packages.txt 26 包）；PHASE 1 SUB-1.4 边界内运行时通过 BiocManager::install('CellChat') 在 biof3-r-runtime R libPath 一次性补齐。CellChat 1.6 依赖 igraph / ComplexHeatmap / circlize / NMF / ggalluvial，部分需从 CRAN 拉取。CellChatDB.human / mouse / zebrafish 已随 CellChat 包内置，运行时无需额外数据库下载。G0 dev Electron 边界内安装（如失败需在 install.sh 内手动重试；不外推 packaged / GA / Provider）。",
+  "requiresBundle": "r-spatial",
+  "requiresBundleVersion": "1.0.0",
+  "steps": [
+    {
+      "id": "biocmanager-cellchat",
+      "language": "r",
+      "command": "Rscript -e 'BiocManager::install(\"CellChat\", ask = FALSE, update = FALSE)'",
+      "installPath": ".libPaths()[1]",
+      "skipOnSupportedPlatform": false,
+      "comment": "CellChat 主包（含 human/mouse/zebrafish DB），约 ~120MB；缺包时按需从 Bioconductor 拉取。",
+      "fallback": "若 BiocManager 在 biof3-r-runtime 中缺失，install.sh 应在 R libPath 中 install.packages('BiocManager') 后再 install('CellChat')。"
+    }
+  ],
+  "fallbackToManualInstall": {
+    "comment": "如安装失败（如离线 CRAN 镜像阻塞），在 acceptance.json runtime-not-ready fixture 中保持 skipOnSupportedPlatform:true；插件仍可 8 件套合规但运行时 blocked。",
+    "documentation": "docs/block-11-bioSkills-runtime-inventory.md §7 / docs/block-11-phase-1-batch-plan.md §3.4"
+  }
+}

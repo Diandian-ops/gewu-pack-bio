@@ -1,0 +1,26 @@
+{
+  "$schema": "../manifest.schema.json",
+  "id": "scvi-tools",
+  "kind": "plugin",
+  "pluginId": "scvi-tools",
+  "pluginVersion": "1.0.0",
+  "entryPoint": "scripts/scvi-tools.py",
+  "environmentFile": "environment.json",
+  "toolDefinitionFile": "tool-definition.json",
+  "acceptanceFile": "acceptance.json",
+  "inputSchema": "schema/input.schema.json",
+  "outputSchema": "schema/output.schema.json",
+  "reportTemplateFile": "scvi-tools-report-template.html",
+  "demoDataDir": "demo-data",
+  "placeholderFigure": "tools/figures/latent_umap_placeholder.png",
+  "ipcChannel": "tools:invoke/scvi-tools",
+  "platforms": ["macos-arm64", "windows-x64"],
+  "builtAgainst": {
+    "python": "3.11.9",
+    "scanpy": "1.11.5",
+    "anndata": "0.12.19",
+    "scvi-tools": "1.4.2",
+    "torch": "2.13.0"
+  },
+  "device": "cpu"
+}

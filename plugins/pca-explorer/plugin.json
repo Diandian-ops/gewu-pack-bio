@@ -1,0 +1,24 @@
+{
+  "id": "pca-explorer",
+  "status": "incubating",
+  "pluginManifestVersion": 1,
+  "title": "PCA 可视化",
+  "version": "1.0.0",
+  "language": "python",
+  "description": "对表达矩阵做 PCA 降维，输出 PC1/PC2 散点图（按分组着色）+ 方差贡献表。",
+  "packages": {
+    "python": {
+      "pandas": ">=2.0.0",
+      "scikit-learn": ">=1.3.0",
+      "matplotlib": ">=3.7.0"
+    }
+  },
+  "runtime": {
+    "python": ">=3.10.0"
+  },
+  "builtAgainst": {
+    "python": "3.11"
+  },
+  "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+  "supportedPlatforms": ["macos-arm64", "macos-x64", "windows-x64"]
+}

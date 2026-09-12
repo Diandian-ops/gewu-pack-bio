@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "pca-explorer",
+  "pluginVersion": "1.0.0",
+  "platforms": ["macos-arm64", "macos-x64", "windows-x64"],
+  "fixtures": [
+    {
+      "id": "valid",
+      "description": "6 samples × 10 genes, WT vs KO groups",
+      "inputs": {
+        "expr_matrix": "demo-data/demo_expr.csv",
+        "group_file": "demo-data/demo_groups.csv",
+        "n_components": 2
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": ["pca_plot.png", "variance_table.csv"]
+    },
+    {
+      "id": "missing-inputs",
+      "description": "No expression file provided",
+      "inputs": {},
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "missing_required_file_inputs"
+    }
+  ],
+  "reproducibility": {
+    "requireScriptSha256": true,
+    "requireParamsHash": true,
+    "requireInputSha256": true,
+    "requireOutputSha256": true,
+    "requireRuntimeVersion": true,
+    "requirePackageVersions": true,
+    "evidenceSource": "runtime-generated artifact-manifest.json + provenance.json"
+  }
+}

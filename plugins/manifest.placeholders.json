@@ -1,0 +1,236 @@
+{
+  "_about": "Placeholders manifest — documents which fields in manifest.json are placeholders pending Week 4 CI fill-in. Documentation only.",
+  "version": "1.0.0",
+  "updated": "2026-07-19",
+  "notes": "Do not fabricate sha256 or sizeBytes. Runtime descriptors were verified and filled during Stage 4; the remaining FigCode placeholders stay null until their real artifacts are measured. The release-contract supported flag remains independent because it describes the signed and notarized desktop release boundary.",
+  "placeholders": [
+    {
+      "pluginId": "figcode-volcano-animated",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-volcano-animated",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-trajectory-branch",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-trajectory-branch",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-sc-doublet",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-sc-doublet",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-cytotrace",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-cytotrace",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-qq-plot",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-qq-plot",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-manhattan",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-manhattan",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-power-curve",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-power-curve",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-meta-forest",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-meta-forest",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-mut-signature",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-mut-signature",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-lego-plot",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-lego-plot",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-spatial-cluster",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-spatial-cluster",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-spatial-deconv-c2l",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-spatial-deconv-c2l",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-feature-spatial",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-feature-spatial",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-spatial-svg-moran",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-spatial-svg-moran",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-squidpy-neighbors",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-squidpy-neighbors",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-spatial-lr-liana",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-spatial-lr-liana",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-scvelo-stream",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-scvelo-stream",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-shap-summary",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-shap-summary",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
+    },
+    {
+      "pluginId": "figcode-data-bsgenome-hg19",
+      "field": "artifacts.macos-arm64.sha256",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "figcode-data-bsgenome-hg19",
+      "field": "artifacts.macos-arm64.sizeBytes",
+      "current": null,
+      "needsFillFrom": "Week 4 release pipeline"
+    }
+  ]
+}

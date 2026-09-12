@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SNF 相似性网络融合 - 结果解读报告 | BioF3</title>
+  <style>
+  :root { --text: #17201d; --muted: #5c6b64; --border: #dfe8e3; --surface: #f8faf9; --primary: #2e8555; --code-bg: #f4f7f5; --warn: #d97706; --info: #2563eb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: var(--text); font: 14px/1.72 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif; }
+  .report { max-width: 860px; padding: 40px 32px 60px; margin: 0 auto; margin-left: max(200px, calc(50% - 330px)); }
+  .report.full { margin-left: auto; margin-right: auto; }
+  .report-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 32px; position: relative; }
+  .report-header .eyebrow { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; }
+  .report-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .report-header .meta { font-size: 12px; color: var(--muted); }
+  h2 { font-size: 18px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; }
+  p { margin: 0 0 12px; } ul, ol { margin: 0 0 12px; padding-left: 22px; } li { margin-bottom: 4px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 6px; overflow-x: auto; margin: 0 0 16px; font-size: 13px; line-height: 1.5; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 13px; }
+  th, td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
+  th { background: var(--surface); font-weight: 600; }
+  .callout { padding: 14px 16px; border-radius: 6px; margin: 16px 0; font-size: 13px; }
+  .callout-info { background: #eff6ff; border-left: 3px solid var(--info); }
+  .callout-warn { background: #fffbeb; border-left: 3px solid var(--warn); }
+  .callout-tip { background: #ecfdf5; border-left: 3px solid var(--primary); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .fig { margin: 20px 0; text-align: center; }
+  .fig img { max-width: 55%; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.1); cursor: zoom-in; transition: transform .3s; } .fig img.zoomed { max-width: 100%; cursor: zoom-out; }
+  .fig-caption { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card .value { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .biof3-wm { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27200%27%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2728%27 font-weight=%27800%27 fill=%27%232e8555%27 opacity=%270.04%27 transform=%27rotate(-25 150 100)%27%3EBioF3%3C/text%3E%3Ctext x=%2750%25%27 y=%2770%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2710%27 font-weight=%27700%27 fill=%27%232e8555%27 opacity=%270.035%27 transform=%27rotate(-25 150 100)%27%3ESHENGXIN F3%3C/text%3E%3C/svg%3E"); }
+  .nav-wrap { position: fixed; left: 0; top: 0; bottom: 0; width: 200px; background: #f8faf9; border-right: 1px solid #dfe8e3; padding: 20px 12px; overflow-y: auto; font-size: 12px; z-index: 50; transition: transform .2s; box-shadow: 2px 0 8px rgba(0,0,0,.06); }
+  .nav-wrap.hidden { transform: translateX(-100%); box-shadow: none; }
+  .nav-toggle { position: fixed; left: 8px; top: 8px; z-index: 60; background: #fff; border: 1px solid #dfe8e3; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .nav-wrap .nav-title { font-weight: 700; font-size: 13px; margin-bottom: 12px; color: #2e8555; }
+  .nav-wrap a { display: block; padding: 4px 0; color: #5c6b64; text-decoration: none; line-height: 1.4; }
+  .nav-wrap a:hover { color: #2e8555; }
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<button class="nav-toggle" onclick="var n=document.querySelector('.nav-wrap'),r=document.querySelector('.report');n.classList.toggle('hidden');r.classList.toggle('full');this.textContent=n.classList.contains('hidden')?'☰':'✕'" title="切换目录">☰</button>
+<div class="biof3-wm" aria-hidden="true"></div>
+<nav class="nav-wrap" id="reportNav"><div class="nav-title">目录</div></nav>
+
+<div class="report">
+
+<header class="report-header">
+  <div class="eyebrow">BioF3 分析工具 · 结果解读报告</div>
+  <h1>SNF 相似性网络融合</h1>
+  <p class="meta">工具版本：SNFtool · 报告模板 v1.0 · 生成于 BioF3 在线分析平台</p>
+</header>
+
+<!-- ============================================================ -->
+<h2>一、分析概览</h2>
+
+<p>本报告对 Similarity Network Fusion (SNF) 的分析结果进行解读。SNF 将多个组学层各自构建的样本相似性网络融合为一个统一网络，再基于融合网络做谱聚类发现亚型。与 MOFA2 的因子分解不同，SNF 是<strong>聚类导向</strong>的多组学整合方法，直接输出亚型划分。</p>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="value">{{samples}}</div><div class="label">样本数</div></div>
+  <div class="stat-card"><div class="value">{{views}}</div><div class="label">组学层数</div></div>
+  <div class="stat-card"><div class="value">{{k}}</div><div class="label">最优 k</div></div>
+  <div class="stat-card"><div class="value">{{K}}</div><div class="label">邻居数</div></div>
+</div>
+
+<div class="callout callout-info">
+  <strong>SNF vs MOFA2 的区别</strong>
+  <ul style="margin:0;padding-left:18px;">
+    <li><strong>SNF</strong>：网络融合 -> 谱聚类，直接输出亚型，适合"我要分几类"</li>
+    <li><strong>MOFA2</strong>：因子分解 -> 连续因子得分，需后续聚类，适合"我要理解结构"</li>
+    <li>建议二者都跑，对比亚型一致性，增强结论可信度</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2>二、融合网络热图</h2>
+
+<div class="fig">
+  <img src="{{fused_network_heatmap.png}}" alt="Fused Network">
+  <div class="fig-caption">图 1：融合后的样本相似性网络热图。对角线方块代表亚型，方块内越红（接近 1）表示样本越相似，方块外越白（接近 0）表示亚型间差异越大。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li><strong>清晰方块</strong>：对角线上有明显的深色方块 -> 聚类稳定，亚型间分离好</li>
+  <li><strong>模糊边界</strong>：方块边界有渐变 -> 部分样本归属不确定</li>
+  <li>与单一组学层的网络对比：融合网络应比任何单一层更清晰（整合了多组学信息）</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>三、Eigen-gap 图（最优 k 选择）</h2>
+
+<div class="fig">
+  <img src="{{eigen_gap.png}}" alt="Eigen Gap">
+  <div class="fig-caption">图 2：特征值间隙图。横轴=k，纵轴=相邻特征值之差。间隙最大的 k 对应最优聚类数。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>曲线峰值对应的 k -> 谱聚类自动推荐的最优亚型数</li>
+  <li>若多个 k 值间隙接近 -> 聚类结构不强，需结合生物学判断</li>
+  <li>与 consensus-cluster 的 delta area 结果交叉验证</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>四、输出数据文件</h2>
+
+<table>
+  <thead><tr><th>文件名</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><code>subtype_assignment.csv</code></td><td>样本-亚型对应表（核心输出）</td></tr>
+    <tr><td><code>fused_network_heatmap.png / .pdf</code></td><td>融合网络热图（双格式）</td></tr>
+    <tr><td><code>eigen_gap.png / .pdf</code></td><td>Eigen-gap 图（双格式）</td></tr>
+    <tr><td><code>nmi_ari_validation.txt</code></td><td>NMI/ARI 验证（如提供已知标签）</td></tr>
+    <tr><td><code>summary.txt</code></td><td>分析摘要</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2>五、下游分析建议</h2>
+
+<ol>
+  <li><strong>生存分析</strong> - 用 km-survival 比较各亚型的预后差异</li>
+  <li><strong>差异分析</strong> - 用 deseq2 比较各亚型的特征基因差异</li>
+  <li><strong>多方法对比</strong> - 与 mo-mofa + consensus-cluster 的亚型结果对比，计算 NMI/ARI</li>
+  <li><strong>有监督建模</strong> - 将亚型作为 label，用 ml-classifier 训练亚型预测器</li>
+  <li><strong>生物学注释</strong> - 对各亚型 marker 基因做富集分析</li>
+</ol>
+
+<div class="callout callout-warn">
+  <strong>注意：SNF 参数敏感性</strong>
+  SNF 对超参数 K（邻居数）和 alpha（相似性超参）较敏感。默认 K=20, alpha=0.5 适用于大多数情况，但小样本（&lt;50）建议降低 K。若结果不稳定，可尝试参数网格搜索。
+</div>
+
+<!-- ============================================================ -->
+<h2>六、方法学说明（可用于论文 Methods）</h2>
+
+<pre>
+Similarity Network Fusion (SNF) was performed using the SNFtool
+package in R. For each omics layer, a sample-by-sample distance
+matrix was computed and converted to a status matrix to build
+an affinity network. The networks were fused with K=20 (number
+of neighbors), alpha=0.5 (hyperparameter), and T=20 iterations.
+Spectral clustering on the fused network identified sample
+subtypes. The optimal number of clusters (k) was determined
+by the eigen-gap heuristic. If ground-truth labels were
+provided, NMI and ARI were computed for validation.
+</pre>
+
+<!-- ============================================================ -->
+<h2>七、参考资料</h2>
+
+<ul>
+  <li>Wang B, et al. Similarity network fusion for aggregating data types on a genomic scale. <em>Nature Methods</em>. 2014;11(3):333-337.</li>
+  <li>Wang B, et al. (SNFtool vignette) <a href="https://cran.r-project.org/web/packages/SNFtool/">CRAN SNFtool</a></li>
+  <li><a href="https://biof3.com/docs/multi-omics/snf">BioF3 教程：SNF 多组学整合</a></li>
+</ul>
+
+<div class="footer">
+  <p>本报告由 BioF3 在线分析平台自动生成，仅供学习参考。如需用于正式发表，请结合实际数据和实验设计进行调整。</p>
+  <p>BioF3 - AI 陪伴的全组学学习与实战平台 · <a href="https://biof3.com">biof3.com</a></p>
+</div>
+
+</div><!-- /.report -->
+<script>document.querySelectorAll(".fig img").forEach(function(img){img.addEventListener("click",function(){this.classList.toggle("zoomed")})});var nav=document.getElementById("reportNav");if(nav){document.querySelectorAll(".report h2").forEach(function(h,i){h.id=h.id||"s"+i;var a=document.createElement("a");a.href="#"+h.id;a.textContent=h.textContent;nav.appendChild(a)});}</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "deseq2",
+  "pluginVersion": "1.0.0",
+  "platforms": ["macos-arm64"],
+  "fixtures": [
+    {
+      "id": "valid",
+      "description": "4 samples (2 WT vs 2 KO), ~30 genes — minimal valid DESeq2 run",
+      "inputs": {
+        "counts": "demo-data/demo-counts.csv",
+        "coldata": "demo-data/demo-coldata.csv",
+        "design": "condition",
+        "contrast_ref": "WT",
+        "contrast_treat": "KO",
+        "padj_cutoff": 0.05,
+        "lfc_cutoff": 1
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": [
+        "deg_table.csv",
+        "volcano.png",
+        "pca.png",
+        "heatmap.png",
+        "vst_matrix.csv",
+        "report.html",
+        "all_results.zip"
+      ]
+    },
+    {
+      "id": "missing-inputs",
+      "description": "No counts or coldata files provided",
+      "inputs": {},
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "missing_required_file_inputs"
+    },
+    {
+      "id": "runtime-not-ready",
+      "description": "DESeq2 package not installed — should return runtime_not_ready",
+      "inputs": {
+        "counts": "demo-data/demo-counts.csv",
+        "coldata": "demo-data/demo-coldata.csv"
+      },
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "runtime_not_ready",
+      "skipOnSupportedPlatform": true
+    }
+  ],
+  "reproducibility": {
+    "requireScriptSha256": true,
+    "requireParamsHash": true,
+    "requireInputSha256": true,
+    "requireOutputSha256": true,
+    "requireRVersion": true,
+    "requirePackageVersions": true,
+    "evidenceSource": "runtime-generated artifact-manifest.json + provenance.json"
+  }
+}

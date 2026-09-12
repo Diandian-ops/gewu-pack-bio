@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>火山图绘制 — 结果解读报告 | BioF3</title>
+  <style>
+  :root {
+    --text: #17201d;
+    --muted: #5c6b64;
+    --border: #dfe8e3;
+    --surface: #f8faf9;
+    --primary: #2e8555;
+    --warn: #d97706;
+    --info: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: var(--text);
+    font: 14px/1.72 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+  .report { max-width: 860px; margin: 0 auto; padding: 40px 32px 60px; }
+  .report-header {
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+  }
+  .eyebrow {
+    color: var(--primary);
+    font-size: 12px;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .meta { color: var(--muted); font-size: 12px; }
+  h2 {
+    border-bottom: 1px solid var(--border);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 36px 0 14px;
+    padding-bottom: 6px;
+  }
+  h3 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; }
+  p { margin: 0 0 12px; }
+  ul, ol { margin: 0 0 12px; padding-left: 22px; }
+  li { margin-bottom: 4px; }
+  code {
+    background: #f4f7f5;
+    border-radius: 3px;
+    font-size: 13px;
+    padding: 1px 5px;
+  }
+  table {
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 0 0 16px;
+    width: 100%;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+  }
+  th { background: var(--surface); font-weight: 600; }
+  .stat-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    margin: 16px 0;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-card .value {
+    color: var(--primary);
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .stat-card .label {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .callout {
+    border-radius: 6px;
+    font-size: 13px;
+    margin: 16px 0;
+    padding: 14px 16px;
+  }
+  .callout-info { background: #eff6ff; border-left: 3px solid var(--info); }
+  .callout-tip { background: #ecfdf5; border-left: 3px solid var(--primary); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .fig { margin: 20px 0; text-align: center; }
+  .fig img {
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    max-width: 88%;
+  }
+  .fig-caption {
+    color: var(--muted);
+    font-size: 12px;
+    font-style: italic;
+    margin-top: 8px;
+  }
+  .badge {
+    background: #e2e8f0;
+    border-radius: 999px;
+    color: #475569;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 650;
+    padding: 2px 8px;
+  }
+  .badge-up { background: #fee2e2; color: #b91c1c; }
+  .badge-down { background: #dbeafe; color: #1d4ed8; }
+  .badge-ns { background: #f1f5f9; color: #64748b; }
+  .footer {
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 48px;
+    padding-top: 20px;
+  }
+  </style>
+</head>
+<body>
+  <main class="report">
+    <header class="report-header">
+      <div class="eyebrow">BioF3 分析工具 · 结果解读报告</div>
+      <h1>火山图绘制</h1>
+      <p class="meta">工具版本：volcano-plot 1.0.0 · 报告模板 v1.0 · 生成于 BioF3 本地分析平台</p>
+    </header>
+
+    <h2>一、分析概览</h2>
+    <p>本报告对差异分析结果表进行可视化汇总。火山图横轴为 <code>log2FC</code>，纵轴为 <code>-log10({{significance_column}})</code>，用于同时观察变化幅度和统计显著性。</p>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="value">{{up_count}}</div><div class="label">上调基因</div></div>
+      <div class="stat-card"><div class="value">{{down_count}}</div><div class="label">下调基因</div></div>
+      <div class="stat-card"><div class="value">{{ns_count}}</div><div class="label">未显著</div></div>
+    </div>
+
+    <div class="callout callout-info">
+      <strong>阈值说明</strong>
+      当前使用 <code>|log2FC| &gt; {{fc_threshold}}</code> 与 <code>-log10({{significance_column}}) &gt; {{pval_threshold}}</code> 判定显著性，并在图中标注 top {{top_n}} 个变化较明显的基因。
+    </div>
+
+    <h2>二、核心图表</h2>
+    <h3>2.1 火山图</h3>
+    <div class="fig">
+      <img src="volcano.png" alt="火山图">
+      <div class="fig-caption">图 1：火山图。红色表示上调，蓝色表示下调，灰色表示未达到当前阈值。</div>
+    </div>
+
+    <p><strong>如何解读：</strong></p>
+    <ul>
+      <li>右上角红色点代表表达上调且统计显著的基因。</li>
+      <li>左上角蓝色点代表表达下调且统计显著的基因。</li>
+      <li>中间灰色点代表未达到当前阈值的基因。</li>
+    </ul>
+
+    <h2>三、Top genes</h2>
+    <table>
+      <thead><tr><th>Gene</th><th>log2FC</th><th>p-value</th><th>分类</th></tr></thead>
+      <tbody>
+        {{top_gene_rows}}
+      </tbody>
+    </table>
+
+    <h2>四、输出文件</h2>
+    <table>
+      <thead><tr><th>文件名</th><th>说明</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><code>volcano.png</code></td><td>火山图 PNG</td><td>主预览和报告插图</td></tr>
+        <tr><td><code>volcano.pdf</code></td><td>火山图 PDF</td><td>论文或汇报中的矢量/高清导出</td></tr>
+        <tr><td><code>classified_table.csv</code></td><td>基因显著性分类表</td><td>下游筛选和二次分析</td></tr>
+        <tr><td><code>deg_table.csv</code></td><td>输入 DEG 表副本</td><td>结果复现和溯源</td></tr>
+        <tr><td><code>manifest.json</code></td><td>结果产物清单</td><td>BioF3 结果导航和 Harness 索引</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+      <strong>下游建议</strong>
+      可以把显著上调/下调基因继续用于 GO/KEGG 富集、GSEA、热图聚类或候选基因验证。
+    </div>
+
+    <div class="footer">
+      <p>本报告由 BioF3 本地分析工具自动生成，请结合实验设计和原始数据质量进行解释。</p>
+    </div>
+  </main>
+</body>
+</html>

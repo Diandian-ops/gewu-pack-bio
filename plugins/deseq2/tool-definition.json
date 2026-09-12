@@ -1,0 +1,150 @@
+{
+  "id": "deseq2",
+  "title": "DESeq2 差异分析",
+  "subtitle": "Bulk RNA-seq 差异表达基因检测",
+  "category": "bulk RNA-seq",
+  "language": "r",
+  "description": "Bulk RNA-seq 差异表达基因检测。",
+  "inputs": [
+    {
+      "id": "counts",
+      "label": "基因表达 counts 矩阵 (CSV: gene × sample)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv"
+    },
+    {
+      "id": "coldata",
+      "label": "样本信息表 (CSV: sample, condition)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv"
+    },
+    {
+      "id": "design",
+      "label": "设计公式（design 列名）",
+      "type": "text",
+      "default": "condition",
+      "hint": "默认 'condition'，与 coldata.csv 中的列名一致"
+    },
+    {
+      "id": "contrast_ref",
+      "label": "对照组（reference level）",
+      "type": "text",
+      "default": "WT"
+    },
+    {
+      "id": "contrast_treat",
+      "label": "实验组（treatment level）",
+      "type": "text",
+      "default": "KO"
+    },
+    {
+      "id": "padj_cutoff",
+      "label": "padj 阈值",
+      "type": "number",
+      "default": 0.05,
+      "required": false
+    },
+    {
+      "id": "lfc_cutoff",
+      "label": "|log2FC| 阈值",
+      "type": "number",
+      "default": 1,
+      "required": false
+    }
+  ],
+  "outputs": [
+    { "id": "deg_table", "filename": "deg_table.csv", "type": "table", "label": "差异基因表" },
+    { "id": "volcano", "filename": "volcano.png", "type": "plot", "label": "火山图" },
+    { "id": "pca", "filename": "pca.png", "type": "plot", "label": "PCA 图" },
+    { "id": "heatmap", "filename": "heatmap.png", "type": "plot", "label": "Top50 热图" },
+    { "id": "vst_matrix", "filename": "vst_matrix.csv", "type": "data", "label": "VST 矩阵" },
+    { "id": "report", "filename": "report.html", "type": "report", "label": "解读报告" },
+    { "id": "zip", "filename": "all_results.zip", "type": "file", "label": "全部结果打包下载" }
+  ],
+  "tutorialUrl": "/docs/bulk-rnaseq/module02",
+  "demoDataUrl": "/demo-data/deseq2-demo",
+  "estimatedMinutes": 2,
+  "packages": ["DESeq2", "ggplot2", "ggrepel", "pheatmap", "png"],
+  "color": "#dc2626",
+  "reportUrl": "/exports/tools/deseq2/index.html",
+  "resultStudio": {
+    "contractVersion": 1,
+    "descriptorVersion": 1,
+    "semanticType": "bulk_rna_differential_expression",
+    "entity": { "type": "gene_differential_expression", "idField": "gene", "fields": { "gene": "string", "baseMean": "number", "log2FoldChange": "number", "pvalue": "number|null", "padj": "number|null" } },
+    "source": { "strategy": "execution_snapshot_per_artifact", "entryPoint": "scripts/deseq2.R" },
+    "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
+    "inputBindings": [
+      { "inputId": "counts", "required": true, "acceptsArtifactTypes": ["table"], "semanticRole": "raw_count_matrix" },
+      { "inputId": "coldata", "required": true, "acceptsArtifactTypes": ["table"], "semanticRole": "sample_metadata" }
+    ],
+    "parameters": {
+      "design": { "type": "text", "default": "condition" },
+      "contrast_ref": { "type": "text", "default": "WT" },
+      "contrast_treat": { "type": "text", "default": "KO" },
+      "padj_cutoff": { "type": "number", "default": 0.05, "minimum": 0, "maximum": 1 },
+      "lfc_cutoff": { "type": "number", "default": 1, "minimum": 0 }
+    },
+    "parameterImpacts": { "design": "workflow", "contrast_ref": "scientific", "contrast_treat": "scientific", "padj_cutoff": "scientific", "lfc_cutoff": "scientific" },
+    "actions": ["filter_rows", "select_genes", "derive_enrichment_input", "recompute"],
+    "artifacts": [
+      { "id": "deg_table", "type": "table", "filename": "deg_table.csv", "interaction": "interactive" },
+      { "id": "volcano", "type": "plot", "filename": "volcano.png", "interaction": "interactive" },
+      { "id": "pca", "type": "plot", "filename": "pca.png", "interaction": "noninteractive" },
+      { "id": "heatmap", "type": "plot", "filename": "heatmap.png", "interaction": "interactive" },
+      { "id": "report", "type": "report", "filename": "report.html", "interaction": "noninteractive" }
+    ],
+    "interactionMappings": [
+      { "artifactId": "deg_table", "mode": "table", "entityType": "gene", "idField": "gene" },
+      { "artifactId": "volcano", "mode": "scatter", "dataArtifactId": "deg_table", "entityType": "gene", "idField": "gene", "xField": "log2FoldChange", "yField": "padj", "yTransform": "neg_log10" },
+      { "artifactId": "heatmap", "mode": "matrix", "dataFile": "vst_matrix.csv", "entityType": "gene", "rowIdField": "row_id", "rowEntityType": "gene", "columnEntityType": "sample" }
+    ],
+    "validator": { "id": "deseq2_result_truth_v1", "checks": ["artifact_truth_valid", "script_sha256", "input_sha256", "output_sha256", "stable_gene_id", "finite_statistics"] },
+    "goldenFixture": { "path": "golden-revisions/result-studio-v1.json" },
+    "upgradePolicy": { "sameMajor": "compatible_if_contract_digests_match", "contractDrift": "migration_required", "missingMigration": "read_only_legacy" }
+  },
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少必需输入文件",
+      "description": "DESeq2 至少需要 counts 矩阵 + coldata；缺一不可。",
+      "recoverable": true,
+      "suggestedFix": "检查用户是否提供了两个 CSV，或者用 '使用示例数据' 按钮。",
+      "detect": "missing required file inputs|missing input file|please provide file"
+    },
+    {
+      "code": "sample_mismatch",
+      "title": "样本名不匹配",
+      "description": "counts 列名与 coldata 行名不一致，DESeq2 无法对齐。",
+      "recoverable": true,
+      "suggestedFix": "提示用户检查 metadata.csv 的 sample 列是否与 counts 的列名完全一致。",
+      "detect": "对齐失败|无交集|sample.*mismatch|counts and coldata"
+    },
+    {
+      "code": "design_column_missing",
+      "title": "design 列不存在",
+      "description": "传入的 design 列名在 coldata 中不存在。R 脚本不再静默回退。",
+      "recoverable": true,
+      "suggestedFix": "检查 coldata 的列名，在 Job 参数中设置正确的 design 列名。",
+      "detect": "design 列.*不存在|design column.*not found|可用的列名"
+    },
+    {
+      "code": "contrast_level_missing",
+      "title": "contrast level 不在 design 列中",
+      "description": "contrast_ref 或 contrast_treat 指定的值在 design 列的 levels 中不存在。",
+      "recoverable": true,
+      "suggestedFix": "检查 coldata 的 design 列实际 levels，设置匹配的 contrast_ref 和 contrast_treat。",
+      "detect": "对照组.*不在|实验组.*不在|实际 levels"
+    },
+    {
+      "code": "insufficient_replicates",
+      "title": "生物学重复不足",
+      "description": "每个条件至少需要 2 个生物学重复。",
+      "recoverable": true,
+      "suggestedFix": "增加每个条件的生物学重复数至至少 2 个。",
+      "detect": "每个条件至少需要.*个生物学重复"
+    }
+  ]
+}

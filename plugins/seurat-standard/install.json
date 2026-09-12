@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "seurat-standard",
+  "pluginVersion": "1.0.0",
+  "policy": "no-install-required",
+  "notes": "seurat-standard 依赖 biof3-r-runtime 内已装的 Seurat>=5.0.0 / SeuratObject>=5.0.0 / ggplot2 / patchwork / dplyr / Matrix / jsonlite / base64enc / png（见 resources/built-in-plugins/r-runtime-packages.txt）。本插件不引入额外 R 包安装；PHASE 1 SUB-1.2 边界内 runtime **不扩展**。",
+  "steps": []
+}

@@ -1,0 +1,132 @@
+{
+  "id": "deg-standardizer",
+  "status": "incubating",
+  "title": "DEG 标准化",
+  "subtitle": "差异分析结果转换为标准 DEG Artifact",
+  "category": "bulk RNA-seq",
+  "language": "r",
+  "version": "1.0.0",
+  "description": "将 DESeq2、limma 或兼容差异结果表转换为稳定、可供下游插件消费的标准 DEG Artifact。不覆盖上游原始结果，不伪造缺失 p 值或 padj，缺少 padj 时阻断。ranked_genes 保留全部基因排序，不只保留显著基因。阈值属于参数和科学决策，必须记录。",
+  "dagStep": "deg-standardization",
+  "dagPosition": "midstream",
+  "downstream": ["volcano-plot", "pca-explorer", "go-kegg", "gsea"],
+  "supportedPlatforms": ["macos-arm64"],
+  "plannedPlatforms": ["macos-x64", "windows-x64", "linux-x64"],
+  "requiresBundle": false,
+  "entryPoint": "scripts/deg-standardizer.R",
+  "packages": {
+    "r": {
+      "jsonlite": ">=1.8.0",
+      "digest": ">=0.6.0"
+    }
+  },
+  "inputs": [
+    {
+      "id": "deg_results",
+      "label": "差异分析结果表 (CSV/TSV)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv,.tsv,.txt"
+    },
+    {
+      "id": "deg_artifact",
+      "label": "上游 DEG Artifact 引用",
+      "type": "text",
+      "required": false,
+      "hint": "deseq2 等上游插件产生的 artifact 引用 ID"
+    },
+    {
+      "id": "gene_col",
+      "label": "gene ID 列名",
+      "type": "text",
+      "default": "gene"
+    },
+    {
+      "id": "gene_id_type",
+      "label": "gene ID 类型",
+      "type": "text",
+      "default": "symbol",
+      "hint": "symbol | ensembl | entrez"
+    },
+    {
+      "id": "effect_col",
+      "label": "effect size 列名",
+      "type": "text",
+      "default": "log2FoldChange"
+    },
+    {
+      "id": "pval_col",
+      "label": "p value 列名",
+      "type": "text",
+      "default": "pvalue"
+    },
+    {
+      "id": "padj_col",
+      "label": "adjusted p value 列名",
+      "type": "text",
+      "default": "padj"
+    },
+    {
+      "id": "padj_threshold",
+      "label": "padj 阈值",
+      "type": "number",
+      "default": 0.05
+    },
+    {
+      "id": "effect_threshold",
+      "label": "|log2FC| 阈值",
+      "type": "number",
+      "default": 1
+    },
+    {
+      "id": "source_method",
+      "label": "来源方法",
+      "type": "text",
+      "default": "DESeq2",
+      "hint": "DESeq2 | limma | edgeR | other"
+    }
+  ],
+  "outputs": [
+    { "id": "deg_standardized", "type": "table", "label": "标准化 DEG 表", "filename": "deg_standardized.csv" },
+    { "id": "deg_up", "type": "table", "label": "显著上调基因", "filename": "deg_up.csv" },
+    { "id": "deg_down", "type": "table", "label": "显著下调基因", "filename": "deg_down.csv" },
+    { "id": "ranked_genes", "type": "table", "label": "排序基因列表 (全量)", "filename": "ranked_genes.csv" },
+    { "id": "filter_summary", "type": "json", "label": "过滤摘要", "filename": "filter_summary.json" },
+    { "id": "report", "type": "report", "label": "标准化报告", "filename": "report.html" }
+  ],
+  "states": ["valid", "warning", "blocked"],
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少必需输入文件",
+      "description": "DEG 结果文件未提供。",
+      "recoverable": true,
+      "suggestedFix": "检查文件路径，或使用示例数据。",
+      "detect": "DEG result file is required|DEG result file not found"
+    },
+    {
+      "code": "invalid_input",
+      "title": "输入数据无效",
+      "description": "缺少必需列（gene、effect size、pvalue、padj）或表为空。",
+      "recoverable": true,
+      "suggestedFix": "检查列名参数是否与实际列名一致，确保 padj 列存在。",
+      "detect": "Gene column.*not found|Effect size column.*not found|P-value column.*not found|Adjusted p-value column.*not found|DEG table is empty"
+    },
+    {
+      "code": "runtime_not_ready",
+      "title": "运行时不可用",
+      "description": "R 运行时或必需包未就绪。",
+      "recoverable": true,
+      "suggestedFix": "确保 R 和 jsonlite/digest 包已安装。",
+      "detect": "runtime not ready|Required R packages.*not available"
+    },
+    {
+      "code": "platform_not_supported",
+      "title": "平台不支持",
+      "description": "当前操作系统不在支持列表内。",
+      "recoverable": false,
+      "suggestedFix": "在 macos-arm64 平台运行。",
+      "detect": "platform not supported|Platform.*not supported"
+    }
+  ]
+}

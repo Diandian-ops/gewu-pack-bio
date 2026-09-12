@@ -1,0 +1,23 @@
+{
+  "$schema": "../manifest.schema.json",
+  "id": "scanpy-advanced",
+  "kind": "plugin",
+  "pluginId": "scanpy-advanced",
+  "pluginVersion": "1.0.0",
+  "entryPoint": "scripts/scanpy-advanced.py",
+  "environmentFile": "environment.json",
+  "toolDefinitionFile": "tool-definition.json",
+  "acceptanceFile": "acceptance.json",
+  "inputSchema": "schema/input.schema.json",
+  "outputSchema": "schema/output.schema.json",
+  "reportTemplateFile": "scanpy-advanced-report-template.html",
+  "demoDataDir": "demo-data",
+  "placeholderFigure": "tools/figures/umap_placeholder.png",
+  "ipcChannel": "tools:invoke/scanpy-advanced",
+  "platforms": ["macos-arm64", "windows-x64"],
+  "builtAgainst": {
+    "python": "3.11.9",
+    "scanpy": "1.11.5",
+    "anndata": "0.12.18"
+  }
+}

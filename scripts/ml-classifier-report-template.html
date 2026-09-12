@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ML 分类器 - 结果解读报告 | BioF3</title>
+  <style>
+  :root { --text: #17201d; --muted: #5c6b64; --border: #dfe8e3; --surface: #f8faf9; --primary: #2e8555; --code-bg: #f4f7f5; --warn: #d97706; --info: #2563eb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: var(--text); font: 14px/1.72 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif; }
+  .report { max-width: 860px; padding: 40px 32px 60px; margin: 0 auto; margin-left: max(200px, calc(50% - 330px)); }
+  .report.full { margin-left: auto; margin-right: auto; }
+  .report-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 32px; position: relative; }
+  .report-header .eyebrow { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; }
+  .report-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .report-header .meta { font-size: 12px; color: var(--muted); }
+  h2 { font-size: 18px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; }
+  p { margin: 0 0 12px; } ul, ol { margin: 0 0 12px; padding-left: 22px; } li { margin-bottom: 4px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 6px; overflow-x: auto; margin: 0 0 16px; font-size: 13px; line-height: 1.5; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 13px; }
+  th, td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
+  th { background: var(--surface); font-weight: 600; }
+  .callout { padding: 14px 16px; border-radius: 6px; margin: 16px 0; font-size: 13px; }
+  .callout-info { background: #eff6ff; border-left: 3px solid var(--info); }
+  .callout-warn { background: #fffbeb; border-left: 3px solid var(--warn); }
+  .callout-tip { background: #ecfdf5; border-left: 3px solid var(--primary); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .fig { margin: 20px 0; text-align: center; }
+  .fig img { max-width: 60%; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.1); cursor: zoom-in; transition: transform .3s; } .fig img.zoomed { max-width: 100%; cursor: zoom-out; }
+  .fig-caption { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card .value { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .biof3-wm { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27200%27%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2728%27 font-weight=%27800%27 fill=%27%232e8555%27 opacity=%270.04%27 transform=%27rotate(-25 150 100)%27%3EBioF3%3C/text%3E%3Ctext x=%2750%25%27 y=%2770%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2710%27 font-weight=%27700%27 fill=%27%232e8555%27 opacity=%270.035%27 transform=%27rotate(-25 150 100)%27%3ESHENGXIN F3%3C/text%3E%3C/svg%3E"); }
+  .nav-wrap { position: fixed; left: 0; top: 0; bottom: 0; width: 200px; background: #f8faf9; border-right: 1px solid #dfe8e3; padding: 20px 12px; overflow-y: auto; font-size: 12px; z-index: 50; transition: transform .2s; box-shadow: 2px 0 8px rgba(0,0,0,.06); }
+  .nav-wrap.hidden { transform: translateX(-100%); box-shadow: none; }
+  .nav-toggle { position: fixed; left: 8px; top: 8px; z-index: 60; background: #fff; border: 1px solid #dfe8e3; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .nav-wrap .nav-title { font-weight: 700; font-size: 13px; margin-bottom: 12px; color: #2e8555; }
+  .nav-wrap a { display: block; padding: 4px 0; color: #5c6b64; text-decoration: none; line-height: 1.4; }
+  .nav-wrap a:hover { color: #2e8555; }
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<button class="nav-toggle" onclick="var n=document.querySelector('.nav-wrap'),r=document.querySelector('.report');n.classList.toggle('hidden');r.classList.toggle('full');this.textContent=n.classList.contains('hidden')?'☰':'✕'" title="切换目录">☰</button>
+<div class="biof3-wm" aria-hidden="true"></div>
+<nav class="nav-wrap" id="reportNav"><div class="nav-title">目录</div></nav>
+
+<div class="report">
+
+<header class="report-header">
+  <div class="eyebrow">BioF3 分析工具 · 结果解读报告</div>
+  <h1>ML 分类器（4 算法对比）</h1>
+  <p class="meta">工具版本：caret / glmnet / e1071 / randomForest / xgboost · 报告模板 v1.0 · 生成于 BioF3 在线分析平台</p>
+</header>
+
+<!-- ============================================================ -->
+<h2>一、分析概览</h2>
+
+<p>本报告对 4 种机器学习分类算法的建模结果进行对比解读。采用 5 折交叉验证（5-fold CV）评估每个算法的泛化性能，通过 ROC 曲线、PR 曲线、校准曲线和混淆矩阵多维度评价，帮助选择最优模型并理解其决策行为。</p>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="value">{{samples}}</div><div class="label">样本数</div></div>
+  <div class="stat-card"><div class="value">{{features}}</div><div class="label">特征数</div></div>
+  <div class="stat-card"><div class="value">{{algorithms}}</div><div class="label">对比算法</div></div>
+  <div class="stat-card"><div class="value">{{cv_folds}}</div><div class="label">CV 折数</div></div>
+</div>
+
+<div class="callout callout-info">
+  <strong>4 种算法</strong>
+  <ul style="margin:0;padding-left:18px;">
+    <li><strong>LR（Logistic Regression）</strong>：线性模型，可解释性强，适合线性可分数据</li>
+    <li><strong>SVM（Support Vector Machine）</strong>：核方法，适合中小样本非线性问题</li>
+    <li><strong>RF（Random Forest）</strong>：集成树模型，稳健抗过拟合，内置特征重要性</li>
+    <li><strong>XGBoost</strong>：梯度提升树，竞赛级表现，适合结构化数据</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2>二、ROC 曲线</h2>
+
+<div class="fig">
+  <img src="{{roc_curves.png}}" alt="ROC Curves">
+  <div class="fig-caption">图 1：4 算法 5-fold CV 的 ROC 曲线对比。横轴=1-特异度（假正率 FPR），纵轴=灵敏度（真正率 TPR）。AUC 越接近 1 越好。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li><strong>AUC</strong>：0.5=随机猜，0.7-0.8=尚可，0.8-0.9=良好，&gt;0.9=优秀</li>
+  <li>关注曲线左上角 - 越靠近左上角，模型在不同阈值下整体表现越好</li>
+  <li>若多算法 AUC 接近，选更简单的模型（奥卡姆剃刀）：LR &gt; SVM &gt; RF &gt; XGBoost</li>
+  <li>类别不平衡时 ROC 可能虚高，需结合 PR 曲线判断</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>三、特征重要性</h3>
+
+<div class="fig">
+  <img src="{{feature_importance.png}}" alt="Feature Importance">
+  <div class="fig-caption">图 2：4 算法特征重要性对比。不同算法用不同指标衡量重要性（LR=系数绝对值，SVM=权重，RF=Gini 重要性，XGBoost=Gain）。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>排名靠前的特征 -> 对模型决策贡献最大</li>
+  <li>多算法一致靠前 -> 特征重要性稳健</li>
+  <li>不同算法排序差异大 -> 模型视角不同，建议结合 SHAP 做更细粒度解释</li>
+  <li>注意：树模型（RF/XGBoost）的重要性是模型内在的，SHAP 提供更严谨的博弈论解释</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>四、输出数据文件</h2>
+
+<table>
+  <thead><tr><th>文件名</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><code>metrics_table.csv</code></td><td>4 算法指标汇总（AUC / Accuracy / Sensitivity / Specificity / F1）</td></tr>
+    <tr><td><code>roc_curves.png / .pdf</code></td><td>ROC 曲线（双格式）</td></tr>
+    <tr><td><code>feature_importance.png / .pdf</code></td><td>特征重要性对比（双格式）</td></tr>
+    <tr><td><code>model.rds</code></td><td>训练好的最优模型（可被 shap-explain 工具读取）</td></tr>
+    <tr><td><code>summary.txt</code></td><td>分析摘要</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2>五、下游分析建议</h2>
+
+<ol>
+  <li><strong>SHAP 解释</strong> - 将 model.rds 传给 shap-explain 工具，获得博弈论级别的特征重要性解释</li>
+  <li><strong>外部验证</strong> - 在独立队列上验证最优模型的泛化能力</li>
+  <li><strong>超参调优</strong> - 如需进一步提升，可手动调整 caret 网格搜索范围</li>
+  <li><strong>临床转化</strong> - 选定模型后，计算每个样本的预测概率，结合临床数据评估实用性</li>
+  <li><strong>避免泄漏</strong> - 确保特征选择在训练集内完成，CV 评估时特征选择应在每折内重做</li>
+</ol>
+
+<div class="callout callout-warn">
+  <strong>注意：模型选择原则</strong>
+  若多算法 AUC 差距 &lt;0.02，优先选择更简单、更可解释的模型。复杂模型（XGBoost）在小样本上易过拟合，AUC 高不代表泛化好。
+</div>
+
+<!-- ============================================================ -->
+<h2>六、方法学说明（可用于论文 Methods）</h2>
+
+<pre>
+Four machine learning algorithms were compared using the
+caret package in R: logistic regression (LR), support vector
+machine (SVM), random forest (RF), and XGBoost. Models were
+evaluated using 5-fold cross-validation, repeated 3 times,
+with the area under the ROC curve (AUC) as the optimization
+metric. All features were pre-processed with centering,
+scaling, and Yeo-Johnson transformation. The best-performing
+model was saved as an RDS object for downstream SHAP analysis.
+</pre>
+
+<!-- ============================================================ -->
+<h2>七、参考资料</h2>
+
+<ul>
+  <li>Kuhn M. Building Predictive Models in R Using the caret Package. <em>JSS</em>. 2008;28(5):1-26.</li>
+  <li>Chen T, Guestrin C. XGBoost: A Scalable Tree Boosting System. <em>KDD</em>. 2016.</li>
+  <li>Robin X, et al. pROC: an open-source package for R to analyze and compare ROC curves. <em>BMC Bioinformatics</em>. 2011;12:77.</li>
+  <li><a href="https://biof3.com/docs/ml/module02">BioF3 教程：机器学习分类器</a></li>
+</ul>
+
+<div class="footer">
+  <p>本报告由 BioF3 在线分析平台自动生成，仅供学习参考。如需用于正式发表，请结合实际数据和实验设计进行调整。</p>
+  <p>BioF3 - AI 陪伴的全组学学习与实战平台 · <a href="https://biof3.com">biof3.com</a></p>
+</div>
+
+</div><!-- /.report -->
+<script>document.querySelectorAll(".fig img").forEach(function(img){img.addEventListener("click",function(){this.classList.toggle("zoomed")})});var nav=document.getElementById("reportNav");if(nav){document.querySelectorAll(".report h2").forEach(function(h,i){h.id=h.id||"s"+i;var a=document.createElement("a");a.href="#"+h.id;a.textContent=h.textContent;nav.appendChild(a)});}</script>
+</body>
+</html>

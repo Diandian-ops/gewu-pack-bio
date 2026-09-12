@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "runtime": {
+    "language": "r",
+    "version": ">=4.3.0",
+    "builtAgainst": "4.5",
+    "platforms": ["macos-arm64", "macos-x64", "windows-x64"]
+  },
+  "capabilities": [],
+  "packages": {
+    "r": {
+      "pheatmap": ">=1.0.12",
+      "jsonlite": ">=1.8.0"
+    }
+  },
+  "policy": {
+    "installInScript": false,
+    "networkDuringAnalysis": false,
+    "recordPackageVersions": true,
+    "recordRuntimeVersion": true
+  }
+}

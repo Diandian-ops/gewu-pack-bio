@@ -1,0 +1,40 @@
+{
+  "packId": "gewu-pack-bio",
+  "name": "格物 · 生信分析包",
+  "nameEn": "Gewu Bioinformatics Analysis Pack",
+  "version": "0.1.0",
+  "kind": "domain-pack",
+  "description": "格物桌面的生信垂直领域包：分析插件、R/Python 分析脚本、演示数据、科学校验与确认钩子、R 运行时档案。安装后生信能力出现在工作台分析入口与插件商店；卸载即回到纯通用 agent 工作台。",
+  "provides": {
+    "plugins": "plugins/",
+    "scripts": "scripts/",
+    "demoData": "demo-data/",
+    "languages": ["r", "python"],
+    "confirmationHooks": ["scientific-task-confirmation"],
+    "artifactTypes": ["plot", "table", "report"]
+  },
+  "requires": {
+    "core": ">=0.0.1-rc.7",
+    "coreCapabilities": [
+      "plugin-source:installed-dir",
+      "script-host-languages",
+      "task-confirmation-hooks",
+      "tool-catalog-projection",
+      "script-host:executor"
+    ]
+  },
+  "install": {
+    "pluginSource": "将本包的 plugins/ 目录登记为插件的 installedDir（环境变量 BIOF3_PLUGINS_DIR，或设置页插件目录）。",
+    "note": "核心不内置生信内容：本包是生信能力的唯一来源。"
+  },
+  "provenance": {
+    "migratedFrom": "biof3-desktop",
+    "migrationDate": "2026-09-12",
+    "migrationBlock": "BLOCK-83 P4",
+    "sourcePaths": [
+      "resources/built-in-plugins/",
+      "core/biof3-server/tool-scripts/",
+      "core/biof3-server/tool-demo-data/"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "volcano-plot",
+  "pluginVersion": "1.0.0",
+  "descriptorVersion": 1,
+  "sourceScriptSha256": "ed50739c762e9fc8d4ae4d1532aa0e52a9af6e98cbcc1514fe29d4f8d5ba2c29",
+  "inputBindingDigest": "017fe2933ad576efb85f8ace71265b0eb89f89bb87272a0a5d3e3a15d46acb7b",
+  "artifactContractDigest": "51bc0b0fe6d4f57b1c038c6efaee3bcff92408db6d8dca195d7b8041dd92feb8",
+  "revisionSourceStrategy": "execution_snapshot_per_artifact",
+  "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
+  "fixtureInput": "demo-data/demo_deg.csv",
+  "expectedArtifactIds": [
+    "volcano",
+    "volcano_svg",
+    "classified_table"
+  ]
+}

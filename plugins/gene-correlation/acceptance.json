@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "gene-correlation",
+  "pluginVersion": "1.0.0",
+  "platforms": ["macos-arm64", "macos-x64", "windows-x64"],
+  "fixtures": [
+    {
+      "id": "valid",
+      "description": "8 samples × 40 genes, top 30 by variance — Pearson correlation",
+      "inputs": {
+        "expr_matrix": "demo-data/demo_expr.csv",
+        "top_n": 30,
+        "method": "pearson"
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": ["heatmap.png", "corr_matrix.csv"]
+    },
+    {
+      "id": "spearman",
+      "description": "Same data, Spearman rank correlation",
+      "inputs": {
+        "expr_matrix": "demo-data/demo_expr.csv",
+        "top_n": 20,
+        "method": "spearman"
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": ["heatmap.png", "corr_matrix.csv"]
+    },
+    {
+      "id": "missing-inputs",
+      "description": "No expression matrix provided",
+      "inputs": {},
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "missing_required_file_inputs"
+    }
+  ],
+  "reproducibility": {
+    "requireScriptSha256": true,
+    "requireParamsHash": true,
+    "requireInputSha256": true,
+    "requireOutputSha256": true,
+    "requireRVersion": true,
+    "requirePackageVersions": true,
+    "evidenceSource": "runtime-generated artifact-manifest.json + provenance.json"
+  }
+}

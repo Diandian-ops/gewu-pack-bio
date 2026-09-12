@@ -1,0 +1,1070 @@
+{
+  "$schema": "./manifest.schema.json",
+  "version": "2.0.0",
+  "updated": "2026-09-02",
+  "checksumAlgorithm": "sha256",
+  "notes": "Per-platform artifact schema (Week 2 发行可信化). macos-arm64 has real artifacts. windows-x64 runtime artifacts for biof3-r-runtime/biof3-py-runtime ARE declared (real OSS zip, HTTP 200, golden-path verified) so dev/unsigned Windows builds can install the runtime from the store; their sha256/sizeBytes are now filled in (computed locally from the real OSS zip on 2026-09-02), so the install-time fail-closed checksum guard (assertArtifactChecksumDeclared, P0-1) passes and the downloaded zip is verified. release-contract.json platforms[windows-x64].supported stays false until the signed Windows installer passes release gating (Week 3/4). macos-x64/linux-x64 have NO artifacts (placeholder-only). Built-in plugins use built-in:// pseudo-URLs and ship under resources/built-in-plugins/{id}/.",
+  "plugins": {
+    "biof3-r-runtime": {
+      "id": "biof3-r-runtime",
+      "title": "R 运行时（基础环境）",
+      "version": "1.0.0",
+      "kind": "runtime",
+      "type": "runtime",
+      "language": "r",
+      "description": "R 4.5.2 + Bioconductor 3.22 + ggplot2/dplyr/data.table/BiocGenerics 等 70+ 包，BioF3 所有 R 工具的运行基础。约 557MB（macOS arm64）。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip",
+          "sha256": "60e1c9bc1eae529585ff8184b2f507331539a8302beb34249b2597fe7231e68c",
+          "sizeBytes": 556916997
+        },
+        "windows-x64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip",
+          "sha256": "26b05ba6f3439f2e7ccef9c979d5e157cdc67640fc45fdc759039f2a03dde462",
+          "sizeBytes": 657224393
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5.2",
+        "bioconductor": "3.22"
+      }
+    },
+    "biof3-py-runtime": {
+      "id": "biof3-py-runtime",
+      "title": "Python 运行时（基础环境）",
+      "version": "1.0.0",
+      "kind": "runtime",
+      "type": "runtime",
+      "language": "python",
+      "description": "Python 3.11.9 + pandas/numpy/scipy/sklearn/matplotlib/scanpy 等 200+ 包，BioF3 所有 Python 工具的运行基础。约 147MB（macOS arm64）。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/macos-arm64.zip",
+          "sha256": "f88502026027aec32eaa03ea5d2faefe77dbd59d0524f99d365208385b2abec8",
+          "sizeBytes": 154126592
+        },
+        "windows-x64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip",
+          "sha256": "5a2e07c6504a49f617d81921e073d157e8fd14e37586e92f78211c2975ab6d11",
+          "sizeBytes": 502819592
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "runtime": {
+        "python": ">=3.10.0"
+      },
+      "builtAgainst": {
+        "python": "3.11.9"
+      }
+    },
+    "volcano-plot": {
+      "id": "volcano-plot",
+      "status": "canonical",
+      "title": "火山图绘制",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "从差异分析结果（log2FC + pvalue）绘制 publication-ready 火山图，支持阈值标注与 top 基因高亮。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://volcano-plot",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "ggplot2": ">=3.4.0",
+          "ggrepel": ">=0.9.0"
+        }
+      },
+      "runtime": {
+        "r": ">=4.3.0"
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "gene-correlation": {
+      "id": "gene-correlation",
+      "status": "incubating",
+      "title": "基因相关性热图",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "计算表达矩阵中 top N 基因的 Pearson/Spearman 相关系数，输出相关性热图 + 系数矩阵 CSV。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://gene-correlation",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "ggplot2": ">=3.4.0",
+          "pheatmap": ">=1.0.12"
+        }
+      },
+      "runtime": {
+        "r": ">=4.3.0"
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "pca-explorer": {
+      "id": "pca-explorer",
+      "status": "incubating",
+      "title": "PCA 可视化",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "python",
+      "description": "对表达矩阵做 PCA 降维，输出 PC1/PC2 散点图（按分组着色）+ 方差贡献表。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://pca-explorer",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": {
+          "pandas": ">=2.0.0",
+          "scikit-learn": ">=1.3.0",
+          "matplotlib": ">=3.7.0"
+        }
+      },
+      "runtime": {
+        "python": ">=3.10.0"
+      },
+      "builtAgainst": {
+        "python": "3.11.9"
+      }
+    },
+    "sample-metadata-validator": {
+      "id": "sample-metadata-validator",
+      "status": "incubating",
+      "title": "样本元数据校验",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "在进入表达 QC 和差异分析之前，验证 counts 矩阵和 metadata 是否能够支持指定的实验设计与 contrast。检查样本对齐、重复、分组完整性、重复数、混淆设计等。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://sample-metadata-validator",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "jsonlite": ">=1.8.0",
+          "digest": ">=0.6.0"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "expression-qc": {
+      "id": "expression-qc",
+      "status": "incubating",
+      "title": "表达矩阵质量控制",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "检查表达/counts 矩阵的数据质量：基因×样本方向、非数值列、NA/Inf、负counts、小数counts、重复gene ID、全零基因、低表达基因比例、library size、样本相关性、样本离群、PCA与设计分组关系、metadata对齐状态。只做QC和质量门，不执行差异表达，不自动删除样本。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://expression-qc",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "jsonlite": ">=1.8.0",
+          "digest": ">=0.6.0"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "deg-standardizer": {
+      "id": "deg-standardizer",
+      "status": "incubating",
+      "title": "DEG 标准化",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "将 DESeq2、limma 或兼容差异结果表转换为稳定、可供下游插件消费的标准 DEG Artifact。不覆盖上游原始结果，不伪造缺失 p 值或 padj，缺少 padj 时阻断。ranked_genes 保留全部基因排序，不只保留显著基因。阈值属于参数和科学决策，必须记录。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://deg-standardizer",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "jsonlite": ">=1.8.0",
+          "digest": ">=0.6.0"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "go-kegg": {
+      "id": "go-kegg",
+      "status": "incubating",
+      "title": "GO/KEGG 富集分析",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "基因功能富集分析（clusterProfiler enrichGO + 离线 KEGG），支持基因列表或 DESeq2 差异结果输入。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://go-kegg",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "clusterProfiler": ">=4.18.0",
+          "enrichplot": ">=1.30.0",
+          "DOSE": ">=4.4.0",
+          "org.Hs.eg.db": ">=3.22.0",
+          "org.Mm.eg.db": ">=3.22.0",
+          "KEGGREST": ">=1.50.0",
+          "ggplot2": ">=4.0.0",
+          "jsonlite": ">=1.8.0",
+          "base64enc": ">=0.1-3"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "gsea": {
+      "id": "gsea",
+      "status": "incubating",
+      "title": "GSEA 基因集富集分析",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "Gene Set Enrichment Analysis（GSEA）：基于全基因组排序的基因集富集（clusterProfiler gseGO/gseKEGG/Hallmark），无需预设显著阈值，支持基因排序列表或 DESeq2 差异结果输入。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://gsea",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "clusterProfiler": ">=4.18.0",
+          "enrichplot": ">=1.30.0",
+          "DOSE": ">=4.4.0",
+          "org.Hs.eg.db": ">=3.22.0",
+          "org.Mm.eg.db": ">=3.22.0",
+          "msigdbr": ">=26.1.0",
+          "KEGGREST": ">=1.50.0",
+          "ggplot2": ">=4.0.0",
+          "jsonlite": ">=1.8.0",
+          "base64enc": ">=0.1-3"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "wgcna": {
+      "id": "wgcna",
+      "status": "incubating",
+      "title": "WGCNA 加权基因共表达网络分析",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "WGCNA 标准流程（Tutorial I）：QC → 软阈值 → 网络构建 → 模块识别 → 模块-性状关联 → Hub 基因。输入表达矩阵 + 数值型性状表，输出模块-性状热图、模块基因表、Hub 基因与完整网络 RDS。上限 ~10000 基因 × ~500 样本。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://wgcna",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "WGCNA": ">=1.74",
+          "flashClust": ">=1.1.4",
+          "impute": ">=1.84.0",
+          "ggplot2": ">=4.0.0",
+          "dplyr": ">=1.1.0",
+          "jsonlite": ">=1.8.0",
+          "base64enc": ">=0.1-3"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "figcode-volcano-animated": {
+      "id": "figcode-volcano-animated",
+      "title": "FigCode · 动画火山图",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "volcano-animated",
+      "description": "动画火山图卡片所需依赖：gifski（GIF 导出）。约 5MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-volcano-animated/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": [
+          "gifski"
+        ]
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "figcode-trajectory-branch": {
+      "id": "figcode-trajectory-branch",
+      "title": "FigCode · 轨迹分支图",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "trajectory-branch",
+      "description": "单细胞轨迹推断卡片所需依赖：monocle3。约 40MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-trajectory-branch/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": [
+          "monocle3"
+        ]
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "figcode-sc-doublet": {
+      "id": "figcode-sc-doublet",
+      "title": "FigCode · 双胞检测 QC",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "sc-doublet",
+      "description": "双胞检测质控卡片所需依赖：scDblFinder。约 15MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-sc-doublet/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": [
+          "scDblFinder"
+        ]
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "figcode-cytotrace": {
+      "id": "figcode-cytotrace",
+      "title": "FigCode · 分化潜能 CytoTRACE",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "cytotrace",
+      "description": "CytoTRACE 分化潜能预测卡片所需依赖：CytoTRACE。约 10MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-cytotrace/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": [
+          "CytoTRACE"
+        ]
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "figcode-qq-plot": {
+      "id": "figcode-qq-plot",
+      "title": "FigCode · QQ 图",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "qq-plot",
+      "description": "QQ 图卡片所需依赖：qqman。约 3MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-qq-plot/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": [
+          "qqman"
+        ]
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "figcode-manhattan": {
+      "id": "figcode-manhattan",
+      "title": "FigCode · 曼哈顿图",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "manhattan",
+      "description": "GWAS 曼哈顿图卡片所需依赖：qqman。约 3MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-manhattan/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": [
+          "qqman"
+        ]
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "figcode-power-curve": {
+      "id": "figcode-power-curve",
+      "title": "FigCode · 功效分析曲线",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "power-curve",
+      "description": "样本量功效分析卡片所需依赖：pwr。约 2MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-power-curve/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": [
+          "pwr"
+        ]
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "figcode-meta-forest": {
+      "id": "figcode-meta-forest",
+      "title": "FigCode · 荟萃分析森林图",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "meta-forest",
+      "description": "荟萃分析森林图卡片所需依赖：metafor。约 8MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-meta-forest/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": [
+          "metafor"
+        ]
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "figcode-mut-signature": {
+      "id": "figcode-mut-signature",
+      "title": "FigCode · 突变签名分析",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "mut-signature",
+      "description": "突变签名分析卡片，需要 BSgenome hg19 数据包。约 5MB（不含数据包）。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-mut-signature/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": []
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      },
+      "dependencies": [
+        "figcode-data-bsgenome-hg19"
+      ]
+    },
+    "figcode-lego-plot": {
+      "id": "figcode-lego-plot",
+      "title": "FigCode · 突变乐高图",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "lego-plot",
+      "description": "突变三核苷酸乐高图卡片，需要 BSgenome hg19 数据包。约 5MB（不含数据包）。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-lego-plot/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": []
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      },
+      "dependencies": [
+        "figcode-data-bsgenome-hg19"
+      ]
+    },
+    "figcode-spatial-cluster": {
+      "id": "figcode-spatial-cluster",
+      "title": "FigCode · 空间聚类",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "spatial-cluster",
+      "description": "空间转录组聚类卡片所需依赖：squidpy。约 120MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-cluster/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": [
+          "squidpy"
+        ]
+      },
+      "builtAgainst": {
+        "python": "3.11.9"
+      }
+    },
+    "figcode-spatial-deconv-c2l": {
+      "id": "figcode-spatial-deconv-c2l",
+      "title": "FigCode · 空间解卷积 Cell2location",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "spatial-deconv-c2l",
+      "description": "空间解卷积卡片所需依赖：squidpy。约 120MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-deconv-c2l/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": [
+          "squidpy"
+        ]
+      },
+      "builtAgainst": {
+        "python": "3.11.9"
+      }
+    },
+    "figcode-feature-spatial": {
+      "id": "figcode-feature-spatial",
+      "title": "FigCode · 空间基因表达",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "feature-spatial",
+      "description": "空间基因表达卡片所需依赖：squidpy。约 120MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-feature-spatial/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": [
+          "squidpy"
+        ]
+      },
+      "builtAgainst": {
+        "python": "3.11.9"
+      }
+    },
+    "figcode-spatial-svg-moran": {
+      "id": "figcode-spatial-svg-moran",
+      "title": "FigCode · 空间高变基因 SVG",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "spatial-svg-moran",
+      "description": "空间自相关 SVG 检验卡片所需依赖：squidpy。约 120MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-svg-moran/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": [
+          "squidpy"
+        ]
+      },
+      "builtAgainst": {
+        "python": "3.11.9"
+      }
+    },
+    "figcode-squidpy-neighbors": {
+      "id": "figcode-squidpy-neighbors",
+      "title": "FigCode · 空间邻居网络",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "squidpy-neighbors",
+      "description": "空间邻居网络卡片所需依赖：squidpy。约 120MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-squidpy-neighbors/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": [
+          "squidpy"
+        ]
+      },
+      "builtAgainst": {
+        "python": "3.11.9"
+      }
+    },
+    "figcode-spatial-lr-liana": {
+      "id": "figcode-spatial-lr-liana",
+      "title": "FigCode · 空间细胞通讯 LIANA",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "spatial-lr-liana",
+      "description": "空间细胞通讯卡片所需依赖：squidpy + liana。约 150MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-lr-liana/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": [
+          "squidpy",
+          "liana"
+        ]
+      },
+      "builtAgainst": {
+        "python": "3.11.9"
+      }
+    },
+    "figcode-scvelo-stream": {
+      "id": "figcode-scvelo-stream",
+      "title": "FigCode · RNA Velocity 流图",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "scvelo-stream",
+      "description": "RNA velocity 流图卡片所需依赖：scvelo。约 80MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-scvelo-stream/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": [
+          "scvelo"
+        ]
+      },
+      "builtAgainst": {
+        "python": "3.11.9"
+      }
+    },
+    "deseq2": {
+      "id": "deseq2",
+      "status": "canonical",
+      "title": "DESeq2 差异分析",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "Bulk RNA-seq 差异表达基因检测（DESeq2 + lfcShrink(apeglm)），Week 3 first-success-path 的核心工具。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://deseq2",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "DESeq2": ">=1.40.0",
+          "ggplot2": ">=3.4.0",
+          "ggrepel": ">=0.9.0",
+          "pheatmap": ">=1.0.12",
+          "apeglm": ">=1.20.0"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5.2"
+      }
+    },
+    "figcode-shap-summary": {
+      "id": "figcode-shap-summary",
+      "title": "FigCode · SHAP 特征重要性",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "shap-summary",
+      "description": "SHAP 模型解释卡片所需依赖：xgboost + shap。约 120MB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-shap-summary/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": [
+          "xgboost",
+          "shap"
+        ]
+      },
+      "builtAgainst": {
+        "python": "3.11.9"
+      }
+    },
+    "figcode-data-bsgenome-hg19": {
+      "id": "figcode-data-bsgenome-hg19",
+      "title": "FigCode 数据包 · BSgenome hg19（突变签名用）",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "figcode-data",
+      "language": "r",
+      "description": "BSgenome.Hsapiens.UCSC.hg19 基因组参考数据，mut-signature 和 lego-plot 卡片需要。约 2.5GB。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-data-bsgenome-hg19/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": [
+          "BSgenome.Hsapiens.UCSC.hg19"
+        ]
+      },
+      "figcodeCardIds": [
+        "mut-signature",
+        "lego-plot"
+      ],
+      "optional": true
+    },
+    "scanpy-advanced": {
+      "id": "scanpy-advanced",
+      "status": "canonical",
+      "title": "Scanpy 高级分析",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "python",
+      "description": "Scanpy 1.9+ 单细胞标准高级流程: QC / normalize / HVG / PCA / UMAP / Leiden / marker genes。运行于 biof3-py-runtime (dev Electron 边界内)，不触发 packaged / Provider / GA（G0 阶段纪律）。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://scanpy-advanced",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": {
+          "scanpy": ">=1.9",
+          "anndata": ">=0.9",
+          "numpy": ">=1.24",
+          "pandas": ">=2.0",
+          "scipy": ">=1.10",
+          "matplotlib": ">=3.7",
+          "seaborn": ">=0.12",
+          "Pillow": ">=9.0"
+        }
+      },
+      "runtime": {
+        "python": ">=3.10.0"
+      },
+      "builtAgainst": {
+        "python": "3.11.9"
+      }
+    },
+    "seurat-standard": {
+      "id": "seurat-standard",
+      "status": "canonical",
+      "title": "Seurat 标准流程",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "Seurat 5.x 标准 single-cell RNA-seq 分析管线: QC → Normalize → HVG → Scale → PCA → Cluster → UMAP → Markers。完全运行于 biof3-r-runtime (dev Electron 边界内), 复用既有 core/biof3-server/tool-scripts/seurat-standard.R 步骤 0 ground truth。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://seurat-standard",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "Seurat": ">=5.0.0",
+          "SeuratObject": ">=5.0.0",
+          "ggplot2": ">=3.4.0",
+          "patchwork": ">=1.3.0",
+          "dplyr": ">=1.1.0",
+          "Matrix": ">=1.7.0",
+          "jsonlite": ">=1.8.0",
+          "base64enc": ">=0.1-3",
+          "png": ">=0.1-8"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5.2",
+        "Seurat": "5.4.0",
+        "SeuratObject": "5.3.0"
+      }
+    },
+    "celltypist": {
+      "id": "celltypist",
+      "status": "canonical",
+      "title": "CellTypist 细胞类型自动注释",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "python",
+      "description": "Celltypist 1.6+ 自动 + 手动 cell type annotation: Model.predict + over_clustering 多数投票。运行于 biof3-py-runtime (dev Electron 边界内)，celltypist 本体 PyPI 未装，需 install.json 触发 bootstrap。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://celltypist",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": {
+          "scanpy": ">=1.9",
+          "anndata": ">=0.9",
+          "numpy": ">=1.24",
+          "pandas": ">=2.0",
+          "scipy": ">=1.10",
+          "matplotlib": ">=3.7",
+          "seaborn": ">=0.12",
+          "Pillow": ">=9.0",
+          "celltypist": ">=1.6"
+        }
+      },
+      "runtime": {
+        "python": ">=3.10.0"
+      },
+      "builtAgainst": {
+        "python": "3.11.9",
+        "celltypist": "1.6.3"
+      }
+    },
+    "cellchat": {
+      "id": "cellchat",
+      "status": "incubating",
+      "title": "CellChat 细胞通讯推断",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "单细胞细胞-细胞通讯推断（R 包 CellChat 1.6+）：从 Seurat 对象出发做 CellChatDB 配体-受体库构建、通讯概率推断（computeCommunProb）、通路级通讯推断（computeCommunProbPathway），输出热图、弦图、气泡图与通路富集表。运行于 biof3-r-runtime (dev Electron 边界内)，CellChat 通过 BiocManager::install 在 biof3-r-runtime libPath 一次性安装（runtime 增量记录在 install.json）。",
+      "requiresBundle": "r-spatial",
+      "requiresBundleVersion": "1.0.0",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://cellchat",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "Seurat": ">=5.0.0",
+          "CellChat": ">=1.6.0",
+          "ggplot2": ">=4.0.0",
+          "ggalluvial": ">=0.12.3",
+          "ComplexHeatmap": ">=2.16.0",
+          "circlize": ">=0.4.15",
+          "igraph": ">=2.0.0",
+          "NMF": ">=0.27",
+          "BiocManager": ">=1.30.0",
+          "jsonlite": ">=1.8.0",
+          "base64enc": ">=0.1-3",
+          "png": ">=0.1-8"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
+    },
+    "scvi-tools": {
+      "id": "scvi-tools",
+      "status": "canonical",
+      "title": "scvi-tools 深度生成单细胞分析",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "python",
+      "description": "scvi-tools (scVI) 深度生成模型 单细胞分析与批次整合：基于 AnnData (.h5ad) 训练 SCVI 变分自编码器 → 隐空间嵌入 / 标准化表达 / 批次整合。biof3-py-runtime 基础栈 + scvi-tools>=1.0 + pytorch (CPU 默认)。dev Electron 边界内 verified（G0 阶段）。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://scvi-tools",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": {
+          "scanpy": ">=1.9",
+          "anndata": ">=0.9",
+          "numpy": ">=1.24",
+          "pandas": ">=2.0",
+          "scipy": ">=1.10",
+          "matplotlib": ">=3.7",
+          "seaborn": ">=0.12",
+          "Pillow": ">=9.0",
+          "scvi-tools": ">=1.0",
+          "torch": ">=2.0"
+        }
+      },
+      "runtime": {
+        "python": ">=3.10.0"
+      },
+      "builtAgainst": {
+        "python": "3.11.9",
+        "scvi-tools": "1.4.2",
+        "torch": "2.13.0"
+      },
+      "device": "cpu"
+    }
+  }
+}

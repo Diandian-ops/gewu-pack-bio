@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "biof3://plugins/celltypist/input.schema.json",
+  "title": "celltypist input schema",
+  "description": "JSON schema for params.json passed to celltypist.py via BioF3 dispatcher. Compatible with celltypist>=1.6 in biof3-py-runtime.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["anndata_file"],
+  "properties": {
+    "anndata_file": {
+      "type": "string",
+      "description": "Path to .h5ad file (relative to jobDir or absolute). Must exist and be >1KB."
+    },
+    "model": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "Path to a local celltypist model .pkl file (offline-friendly). If provided, takes precedence over model_name."
+    },
+    "model_name": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "Built-in celltypist model name (e.g. Immune_All_Low.pkl). Requires network to download if not pre-bundled."
+    },
+    "majority_voting": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to apply majority voting over clusters (over_clustering)."
+    },
+    "over_clustering": {
+      "type": "string",
+      "default": "leiden",
+      "description": "obs column key for over_clustering (leiden / louvain / custom)."
+    },
+    "p_thres": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.5,
+      "description": "Probability threshold for multi-label classification (mode='prob match')."
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["best match", "prob match", "binary"],
+      "default": "best match",
+      "description": "celltypist.annotate mode: 'best match' / 'prob match' / 'binary'."
+    },
+    "min_prop": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "description": "Minimum proportion of cells in cluster for majority voting."
+    },
+    "min_genes": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 200,
+      "description": "sc.pp.filter_cells(min_genes) threshold; cells with fewer genes are dropped."
+    },
+    "min_cells": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 3,
+      "description": "sc.pp.filter_genes(min_cells) threshold; genes detected in fewer cells are dropped."
+    }
+  }
+}

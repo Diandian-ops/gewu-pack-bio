@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "gsea",
+  "pluginVersion": "1.0.0",
+  "platforms": ["macos-arm64"],
+  "fixtures": [
+    {
+      "id": "valid",
+      "description": "Ranked gene list with known pathway enrichment (human symbols)",
+      "inputs": {
+        "deg_table": "demo-data/ranked_list.csv",
+        "organism": "hsa",
+        "gene_id_type": "symbol",
+        "gene_set": "GO_BP",
+        "min_size": 10,
+        "max_size": 500
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": ["gsea_results.csv", "gsea_dotplot.png", "gsea_waterfall.png", "report.html"],
+      "requiresBundle": true
+    },
+    {
+      "id": "empty-result",
+      "description": "Ranked list with no enriched gene sets — valid empty result",
+      "inputs": {
+        "deg_table": "demo-data/ranked_list.csv",
+        "organism": "hsa",
+        "gene_id_type": "symbol",
+        "gene_set": "GO_BP",
+        "min_size": 10,
+        "max_size": 500
+      },
+      "expectedStatus": "valid",
+      "expectedNote": "No enriched gene sets — valid empty scientific result"
+    },
+    {
+      "id": "missing-inputs",
+      "description": "No ranked list provided",
+      "inputs": {},
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "missing_required_file_inputs"
+    },
+    {
+      "id": "runtime-not-ready",
+      "description": "clusterProfiler or msigdbr not installed",
+      "inputs": {
+        "deg_table": "demo-data/ranked_list.csv",
+        "organism": "hsa"
+      },
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "runtime_not_ready",
+      "skipOnSupportedPlatform": true
+    }
+  ],
+  "reproducibility": {
+    "requireScriptSha256": true,
+    "requireParamsHash": true,
+    "requireInputSha256": true,
+    "requireOutputSha256": true,
+    "requireRVersion": true,
+    "requirePackageVersions": true,
+    "evidenceSource": "runtime-generated artifact-manifest.json + provenance.json"
+  }
+}

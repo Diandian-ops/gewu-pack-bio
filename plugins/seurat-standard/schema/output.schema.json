@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "biof3://plugins/seurat-standard/output.schema.json",
+  "title": "seurat-standard output schema",
+  "description": "JSON schema for the 8 expected outputs from seurat-standard.R (files written to <jobDir>/output/).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["outputs", "stats"],
+  "properties": {
+    "outputs": {
+      "type": "array",
+      "description": "List of 8 file names written under jobDir/output/.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "seurat_obj.rds",
+          "markers_table.csv",
+          "qc_metrics.csv",
+          "umap_clusters.png",
+          "umap_coords.csv",
+          "hvg_plot.png",
+          "report.html",
+          "manifest.json"
+        ]
+      },
+      "minItems": 1
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["cells_input", "cells_after_qc", "n_genes", "n_variable", "dims_used", "resolution", "n_clusters", "n_markers"],
+      "properties": {
+        "cells_input": { "type": "integer", "minimum": 0 },
+        "cells_after_qc": { "type": "integer", "minimum": 0 },
+        "n_genes": { "type": "integer", "minimum": 0 },
+        "n_variable": { "type": "integer", "minimum": 0 },
+        "dims_used": { "type": "integer", "minimum": 1 },
+        "resolution": { "type": "number" },
+        "n_clusters": { "type": "integer", "minimum": 0 },
+        "n_markers": { "type": "integer", "minimum": 0 },
+        "species": { "type": "string" },
+        "sci_style": { "type": "boolean" },
+        "dual_format": { "type": "boolean" }
+      }
+    }
+  }
+}

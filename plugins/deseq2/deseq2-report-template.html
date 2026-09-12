@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DESeq2 差异分析 — 结果解读报告 | BioF3</title>
+  <style>
+  :root {
+    --text: #17201d;
+    --muted: #5c6b64;
+    --border: #dfe8e3;
+    --surface: #f8faf9;
+    --primary: #2e8555;
+    --warn: #d97706;
+    --info: #2563eb;
+    --code-bg: #f4f7f5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: var(--text); font: 14px/1.72 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif; }
+  .report { max-width: 860px; padding: 40px 32px 60px; margin: 0 auto; margin-left: max(200px, calc(50% - 330px)); }
+  .report.full { margin-left: auto; margin-right: auto; }
+  .report-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 32px; }
+  .report-header .eyebrow { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; }
+  .report-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .report-header .meta { font-size: 12px; color: var(--muted); }
+  h2 { font-size: 18px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; }
+  p { margin: 0 0 12px; }
+  ul, ol { margin: 0 0 12px; padding-left: 22px; }
+  li { margin-bottom: 4px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  .status-badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #fff; }
+  .status-valid { background: var(--primary); }
+  .status-warning { background: var(--warn); }
+  .status-blocked { background: #dc2626; }
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin: 16px 0; }
+  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px; }
+  .summary-card .label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .summary-card .value { font-size: 20px; font-weight: 700; }
+  .note { background: #fef3c7; border: 1px solid #fde68a; border-radius: 6px; padding: 12px 16px; margin: 16px 0; font-size: 13px; }
+  .note.info { background: #eff6ff; border-color: #bfdbfe; }
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  .deg-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .deg-table th, .deg-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: right; }
+  .deg-table th { background: var(--surface); font-weight: 600; color: var(--muted); }
+  .deg-table th:first-child, .deg-table td:first-child { text-align: left; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .deg-table tbody tr:hover { background: #f0f7f3; }
+  .deg-table .up { color: var(--primary); font-weight: 600; }
+  .deg-table .down { color: var(--warn); font-weight: 600; }
+  .deg-table .more { text-align: center; color: var(--muted); font-style: italic; }
+  .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="report">
+  <div class="report-header">
+    <div class="eyebrow">BioF3 · Bulk RNA-seq</div>
+    <h1>DESeq2 差异分析报告</h1>
+    <div class="meta">Plugin: deseq2 v1.0.0 | <span class="status-badge status-valid">✓ VALID</span></div>
+  </div>
+  <p>本报告由 BioF3 deseq2 工具在运行时生成，包含差异表达基因摘要与可视化结果。所有图表以内嵌方式打包，可离线查看。</p>
+
+  <h2>分析摘要</h2>
+  <div class="summary-grid">
+    <div class="summary-card"><div class="label">检测基因数（过滤后）</div><div class="value">{{TOTAL_GENES}}</div></div>
+    <div class="summary-card"><div class="label">显著差异基因</div><div class="value">{{SIG_GENES}}</div></div>
+    <div class="summary-card"><div class="label">上调</div><div class="value" style="color:var(--primary)">{{UP}}</div></div>
+    <div class="summary-card"><div class="label">下调</div><div class="value" style="color:var(--warn)">{{DOWN}}</div></div>
+  </div>
+  <div class="note info">
+    设计因子 <code>{{DESIGN}}</code> ｜ 对照组 <code>{{REF}}</code> ｜ 实验组 <code>{{TREAT}}</code><br>
+    显著性阈值：padj &lt; {{PADJ}} 且 |log₂FC| &gt; {{LFC}}
+  </div>
+
+  <h2>可视化结果</h2>
+  <h3>文库大小（Library Size）</h3>
+  <img src="https://biof3.com/api/r/tools/demo/deseq2/library_size.png" alt="Library Size" style="max-width:100%;border:1px solid var(--border);border-radius:6px">
+  <h3>离散度估计（Dispersion）</h3>
+  <img src="https://biof3.com/api/r/tools/demo/deseq2/dispersion.png" alt="Dispersion" style="max-width:100%;border:1px solid var(--border);border-radius:6px">
+  <h3>主成分分析（PCA）</h3>
+  <img src="https://biof3.com/api/r/tools/demo/deseq2/pca.png" alt="PCA" style="max-width:100%;border:1px solid var(--border);border-radius:6px">
+  <h3>样本距离（Sample Distance）</h3>
+  <img src="https://biof3.com/api/r/tools/demo/deseq2/sample_distance.png" alt="Sample Distance" style="max-width:100%;border:1px solid var(--border);border-radius:6px">
+  <h3>火山图（Volcano）</h3>
+  <img src="https://biof3.com/api/r/tools/demo/deseq2/volcano.png" alt="Volcano" style="max-width:100%;border:1px solid var(--border);border-radius:6px">
+  <h3>MA 图（MA Plot）</h3>
+  <img src="https://biof3.com/api/r/tools/demo/deseq2/ma_plot.png" alt="MA Plot" style="max-width:100%;border:1px solid var(--border);border-radius:6px">
+  <h3>Top50 差异基因热图（Heatmap）</h3>
+  <img src="https://biof3.com/api/r/tools/demo/deseq2/heatmap_top50.png" alt="Heatmap" style="max-width:100%;border:1px solid var(--border);border-radius:6px">
+
+  <h2>差异基因明细</h2>
+  <p>共 <strong>{{SIG_GENES}}</strong> 个显著差异基因（上调 <strong style="color:var(--primary)">{{UP}}</strong> ／ 下调 <strong style="color:var(--warn)">{{DOWN}}</strong>）。下表按 padj 升序列出全部显著差异基因，完整数据见产物 <code>deg_table.csv</code>。</p>
+  <div class="table-wrap">
+    <table class="deg-table">
+      <thead>
+        <tr><th>基因</th><th>baseMean</th><th>log₂FC</th><th>padj</th><th>调控</th></tr>
+      </thead>
+      <tbody>
+        {{DEG_TABLE}}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">Generated by BioF3 deseq2 | R: runtime</div>
+</div>
+</body>
+</html>

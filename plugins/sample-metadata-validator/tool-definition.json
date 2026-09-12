@@ -1,0 +1,148 @@
+{
+  "id": "sample-metadata-validator",
+  "title": "样本元数据校验",
+  "subtitle": "counts 矩阵与 metadata 实验设计对齐验证",
+  "category": "bulk RNA-seq",
+  "language": "r",
+  "description": "在进入表达 QC 和差异分析之前，验证 counts 矩阵和 metadata 是否能够支持指定的实验设计与 contrast。",
+  "inputs": [
+    {
+      "id": "counts",
+      "label": "基因表达 counts 矩阵 (CSV/TSV: gene × sample)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv,.tsv,.txt"
+    },
+    {
+      "id": "metadata",
+      "label": "样本信息表 (CSV/TSV: sample, condition, ...)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv,.tsv,.txt"
+    },
+    {
+      "id": "sample_column",
+      "label": "样本标识列名",
+      "type": "text",
+      "default": "sample",
+      "hint": "metadata 中标识样本的列名"
+    },
+    {
+      "id": "design_column",
+      "label": "设计列名",
+      "type": "text",
+      "default": "condition",
+      "hint": "metadata 中用于对比的分组列名"
+    },
+    {
+      "id": "reference_group",
+      "label": "对照组 (reference level)",
+      "type": "text",
+      "default": "Control"
+    },
+    {
+      "id": "treatment_group",
+      "label": "实验组 (treatment level)",
+      "type": "text",
+      "default": "Treatment"
+    },
+    {
+      "id": "min_replicates",
+      "label": "最少重复数",
+      "type": "integer",
+      "default": 2
+    }
+  ],
+  "outputs": [
+    { "id": "validated_metadata", "type": "table", "label": "对齐后的 metadata", "filename": "validated_metadata.csv" },
+    { "id": "sample_alignment", "type": "table", "label": "样本对齐详情", "filename": "sample_alignment.csv" },
+    { "id": "design_summary", "type": "json", "label": "设计摘要", "filename": "design_summary.json" },
+    { "id": "validation_diagnostics", "type": "json", "label": "校验诊断", "filename": "validation_diagnostics.json" },
+    { "id": "report", "type": "report", "label": "校验报告", "filename": "report.html" }
+  ],
+  "estimatedMinutes": 1,
+  "packages": ["jsonlite", "digest"],
+  "color": "#2563eb",
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少必需输入文件",
+      "description": "counts 或 metadata 文件未提供。",
+      "recoverable": true,
+      "suggestedFix": "检查文件路径，或使用示例数据。",
+      "detect": "missing required file inputs|Required input files missing"
+    },
+    {
+      "code": "sample_id_column_missing",
+      "title": "样本标识列缺失",
+      "description": "metadata 中找不到指定的 sample 列。",
+      "recoverable": true,
+      "suggestedFix": "检查 sample_column 参数是否与 metadata 列名一致。",
+      "detect": "Sample column.*not found in metadata"
+    },
+    {
+      "code": "sample_mismatch",
+      "title": "样本名不匹配",
+      "description": "counts 列名与 metadata 样本 ID 严重不一致。",
+      "recoverable": true,
+      "suggestedFix": "检查 metadata 的 sample 列是否与 counts 列名完全一致。",
+      "detect": "sample mismatch|Zero overlap|Severe sample mismatch"
+    },
+    {
+      "code": "duplicated_samples",
+      "title": "重复样本",
+      "description": "counts 或 metadata 中存在重复样本 ID。",
+      "recoverable": true,
+      "suggestedFix": "去重或修正样本命名。",
+      "detect": "Duplicate sample"
+    },
+    {
+      "code": "missing_design_column",
+      "title": "设计列缺失",
+      "description": "metadata 中找不到指定的 design 列。",
+      "recoverable": true,
+      "suggestedFix": "检查 design_column 参数是否与 metadata 列名一致。",
+      "detect": "Design column.*not found in metadata"
+    },
+    {
+      "code": "contrast_level_missing",
+      "title": "对比水平缺失",
+      "description": "reference 或 treatment 分组在数据中不存在。",
+      "recoverable": true,
+      "suggestedFix": "检查 reference_group 和 treatment_group 参数值。",
+      "detect": "Contrast levels not found"
+    },
+    {
+      "code": "insufficient_replicates",
+      "title": "重复数不足",
+      "description": "某一组的样本数低于最低要求。",
+      "recoverable": true,
+      "suggestedFix": "增加样本或调整 min_replicates。",
+      "detect": "Insufficient replicates"
+    },
+    {
+      "code": "invalid_design",
+      "title": "无效设计",
+      "description": "设计完全混淆，无法估计 contrast。",
+      "recoverable": true,
+      "suggestedFix": "检查实验设计，确保至少有两组且有生物学重复。",
+      "detect": "design is confounded|Cannot estimate contrast|Cannot proceed to modeling"
+    },
+    {
+      "code": "runtime_not_ready",
+      "title": "运行时不可用",
+      "description": "R 运行时或必需包未就绪。",
+      "recoverable": true,
+      "suggestedFix": "确保 R 和 jsonlite/digest 包已安装。",
+      "detect": "runtime not ready|Required R packages.*not available"
+    },
+    {
+      "code": "platform_not_supported",
+      "title": "平台不支持",
+      "description": "当前操作系统不在支持列表内。",
+      "recoverable": false,
+      "suggestedFix": "在 macos-arm64 平台运行。",
+      "detect": "platform not supported"
+    }
+  ]
+}

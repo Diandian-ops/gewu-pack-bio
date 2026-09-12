@@ -1,0 +1,210 @@
+{
+  "id": "seurat-standard",
+  "title": "Seurat 标准流程",
+  "subtitle": "scRNA-seq 标准 R 流程 (QC → Normalize → HVG → Scale → PCA → Cluster → UMAP → Markers)",
+  "category": "single-cell",
+  "language": "r",
+  "description": "基于 Seurat 5.x 对 10X 三件套 / CSV / TSV / h5 矩阵执行单细胞 RNA-seq 标准分析: QC + NormalizeData + FindVariableFeatures + ScaleData + RunPCA + FindNeighbors + FindClusters + RunUMAP + FindAllMarkers。输出 10 张 PNG/PDF 图 + 6 份中间数据 CSV + seurat_obj.rds + report.html + manifest.json。复用既有 core/biof3-server/tool-scripts/seurat-standard.R 的步骤 0 ground truth (_seurat-standard-scope.md)。",
+  "inputs": [
+    {
+      "id": "matrix_file",
+      "label": "表达矩阵输入",
+      "type": "file",
+      "required": true,
+      "accept": ".csv,.tsv,.txt,.mtx,.mtx.gz,.h5",
+      "description": "支持 10X 三件套 (matrix.mtx + barcodes.tsv + features.tsv) 或单个 CSV/TSV/MTX/H5。"
+    },
+    {
+      "id": "species",
+      "label": "物种",
+      "type": "select",
+      "default": "human",
+      "options": ["human", "mouse"],
+      "required": false,
+      "description": "人类用 ^MT-, 鼠用 ^mt- 作为线粒体基因 pattern。"
+    },
+    {
+      "id": "min_features",
+      "label": "CreateSeuratObject min.features",
+      "type": "number",
+      "default": 200,
+      "required": false,
+      "minimum": 50,
+      "maximum": 1000,
+      "description": "CreateSeuratObject(min.features=200) 最低检出基因数。"
+    },
+    {
+      "id": "max_features",
+      "label": "nFeature_RNA 上限 (subset)",
+      "type": "number",
+      "default": 2500,
+      "required": false,
+      "minimum": 500,
+      "maximum": 10000,
+      "description": "subset(nFeature_RNA < max_features) 过滤上限。"
+    },
+    {
+      "id": "max_mt",
+      "label": "percent.mt 上限",
+      "type": "number",
+      "default": 5,
+      "required": false,
+      "minimum": 0,
+      "maximum": 50,
+      "description": "subset(percent.mt < max_mt) 线粒体基因比例上限 (%)。"
+    },
+    {
+      "id": "nfeatures",
+      "label": "FindVariableFeatures nfeatures",
+      "type": "number",
+      "default": 2000,
+      "required": false,
+      "minimum": 100,
+      "maximum": 5000,
+      "description": "FindVariableFeatures(selection.method='vst', nfeatures=N)。"
+    },
+    {
+      "id": "dims",
+      "label": "PCA 主成分数 (1:dims)",
+      "type": "number",
+      "default": 10,
+      "required": false,
+      "minimum": 2,
+      "maximum": 50,
+      "description": "FindNeighbors/FindClusters/RunUMAP dims=1:N 的 N。"
+    },
+    {
+      "id": "resolution",
+      "label": "FindClusters resolution",
+      "type": "number",
+      "default": 0.5,
+      "required": false,
+      "minimum": 0.1,
+      "maximum": 2.0,
+      "description": "FindClusters(resolution=N) 聚类粒度。"
+    },
+    {
+      "id": "top_n_markers",
+      "label": "Top markers 数 (heatmap + vln + feature)",
+      "type": "number",
+      "default": 10,
+      "required": false,
+      "minimum": 1,
+      "maximum": 30,
+      "description": "每个 cluster 取 top N marker 用于 DoHeatmap / VlnPlot / FeaturePlot。"
+    }
+  ],
+  "outputs": [
+    { "id": "preprocessed", "filename": "seurat_obj.rds", "type": "data", "label": "Seurat 对象 (.rds)" },
+    { "id": "marker_genes", "filename": "markers_table.csv", "type": "table", "label": "Marker 基因表" },
+    { "id": "qc_metrics", "filename": "qc_metrics.csv", "type": "table", "label": "QC 指标表" },
+    { "id": "umap", "filename": "umap_clusters.png", "type": "plot", "label": "UMAP 聚类可视化" },
+    { "id": "umap_coords", "filename": "umap_coords.csv", "type": "table", "label": "UMAP 坐标 + cluster" },
+    { "id": "hvg_plot", "filename": "hvg_plot.png", "type": "plot", "label": "高变基因分布" },
+    { "id": "report", "filename": "report.html", "type": "report", "label": "分析报告" },
+    { "id": "manifest", "filename": "manifest.json", "type": "manifest", "label": "Job manifest" }
+  ],
+  "tutorialUrl": "/docs/single-cell/seurat-standard",
+  "demoDataUrl": "/demo-data/seurat-standard-demo",
+  "estimatedMinutes": 3,
+  "packages": ["Seurat", "SeuratObject", "ggplot2", "patchwork", "dplyr", "Matrix", "jsonlite", "base64enc", "png"],
+  "color": "#7c3aed",
+  "reportUrl": "/exports/tools/seurat-standard/index.html",
+  "ipcChannel": "tools:invoke/seurat-standard",
+  "diagnostics": {
+    "stdout": "seurat-standard > 进度通过 progress.json 驱动",
+    "stderr": "preflight 失败 → exit 3 (missing-inputs); runtime 缺包 → exit 4 (runtime-not-ready); empty-result → exit 5",
+    "exitCodeMap": {
+      "0": "valid",
+      "3": "missing_required_file_inputs",
+      "4": "runtime_not_ready",
+      "5": "empty_result"
+    }
+  },
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少表达矩阵输入",
+      "description": "job 目录未发现合法的 10X 三件套 (matrix.mtx + barcodes.tsv + features.tsv) 或单个 matrix.{csv,tsv,mtx,h5} 输入。",
+      "recoverable": true,
+      "suggestedFix": "确认 matrix_file input 已绑定且文件 >1KB；或先跑 expression-qc / sample-metadata-validator 链式上游产出。",
+      "detect": "No input matrix file found \\| matrix 文件未找到 \\| 缺少 matrix 输入"
+    },
+    {
+      "code": "runtime_not_ready",
+      "title": "R 运行时缺包",
+      "description": "biof3-r-runtime 未装 Seurat / SeuratObject / patchwork 等核心包，或 Rscript 不可达。",
+      "recoverable": true,
+      "suggestedFix": "先安装 biof3-r-runtime 1.0.0+ (含 Seurat>=5.0.0 + SeuratObject>=5.0.0 + patchwork>=1.3.0 + Matrix)；或在平台设置确认 R runtime 已 provision。",
+      "detect": "Error: package or namespace load failed \\| there is no package called 'Seurat' \\| biof3-r-runtime 缺少依赖"
+    },
+    {
+      "code": "empty_result",
+      "title": "细胞/基因数过少",
+      "description": "QC 后样本数不足以跑 FindNeighbors/FindClusters/RunUMAP；属空结果 (empty-result)，脚本仍落盘 QC summary + placeholder PNG。",
+      "recoverable": true,
+      "suggestedFix": "降低 min_features / 放宽 max_mt；或换更大数据集；该结果不算 failed 任务。",
+      "detect": "Too few cells \\| QC 后样本.*过少 \\| insufficient cells"
+    }
+  ],
+  "resultStudio": {
+    "contractVersion": 1,
+    "descriptorVersion": 1,
+    "semanticType": "single_cell_clustering",
+    "entity": {
+      "type": "cell_clustering",
+      "idField": "cell_id",
+      "fields": {
+        "cell_id": "string",
+        "seurat_cluster": "string",
+        "umap_x": "number",
+        "umap_y": "number"
+      }
+    },
+    "source": {
+      "strategy": "execution_snapshot_per_artifact",
+      "entryPoint": "scripts/seurat-standard.R"
+    },
+    "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
+    "inputBindings": [
+      {
+        "inputId": "matrix_file",
+        "required": true,
+        "acceptsArtifactTypes": ["data"],
+        "semanticRole": "single_cell_expression_matrix"
+      }
+    ],
+    "parameters": {
+      "species": { "type": "select", "default": "human", "options": ["human", "mouse"] },
+      "min_features": { "type": "number", "default": 200, "minimum": 50, "maximum": 1000 },
+      "max_features": { "type": "number", "default": 2500, "minimum": 500, "maximum": 10000 },
+      "max_mt": { "type": "number", "default": 5, "minimum": 0, "maximum": 50 },
+      "nfeatures": { "type": "number", "default": 2000, "minimum": 100, "maximum": 5000 },
+      "dims": { "type": "number", "default": 10, "minimum": 2, "maximum": 50 },
+      "resolution": { "type": "number", "default": 0.5, "minimum": 0.1, "maximum": 2.0 },
+      "top_n_markers": { "type": "number", "default": 10, "minimum": 1, "maximum": 30 }
+    },
+    "parameterImpacts": {
+      "species": "scientific",
+      "min_features": "scientific",
+      "max_features": "scientific",
+      "max_mt": "scientific",
+      "nfeatures": "scientific",
+      "dims": "scientific",
+      "resolution": "scientific",
+      "top_n_markers": "scientific"
+    },
+    "actions": ["filter_cells", "rerun_clustering", "change_resolution", "recompute"],
+    "artifacts": [
+      { "id": "preprocessed", "type": "data", "filename": "seurat_obj.rds", "interaction": "interactive" },
+      { "id": "marker_genes", "type": "table", "filename": "markers_table.csv", "interaction": "interactive" },
+      { "id": "umap", "type": "plot", "filename": "umap_clusters.png", "interaction": "interactive" },
+      { "id": "report", "type": "report", "filename": "report.html", "interaction": "noninteractive" }
+    ],
+    "interactionMappings": [
+      { "artifactId": "preprocessed", "mode": "seurat", "entityType": "cell", "idField": "cell_id" },
+      { "artifactId": "marker_genes", "mode": "table", "entityType": "gene", "idField": "gene" },
+      { "artifactId": "umap", "mode": "plot", "entityType": "image" }
+    ]
+  }
+}

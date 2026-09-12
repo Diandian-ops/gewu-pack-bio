@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "runtime": {
+    "language": "r",
+    "version": ">=4.3.0",
+    "builtAgainst": "4.5",
+    "platforms": ["macos-arm64", "macos-x64", "windows-x64"]
+  },
+  "capabilities": [],
+  "packages": {
+    "r": {
+      "ggplot2": ">=3.4.0",
+      "ggrepel": ">=0.9.0"
+    }
+  },
+  "policy": {
+    "installInScript": false,
+    "networkDuringAnalysis": false,
+    "recordPackageVersions": true,
+    "recordRuntimeVersion": true
+  }
+}

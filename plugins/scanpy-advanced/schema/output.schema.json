@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "biof3://plugins/scanpy-advanced/output.schema.json",
+  "title": "scanpy-advanced output schema",
+  "description": "JSON schema for the 8 expected outputs from scanpy-advanced.py (files written to <jobDir>/output/).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["outputs", "stats"],
+  "properties": {
+    "outputs": {
+      "type": "array",
+      "description": "List of 8 file names written under jobDir/output/.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "preprocessed.h5ad",
+          "marker_genes.csv",
+          "qc_summary.csv",
+          "umap.png",
+          "umap_clustered.png",
+          "hvg_plot.png",
+          "report.html",
+          "manifest.json"
+        ]
+      },
+      "minItems": 1
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["n_obs_in", "n_vars_in", "n_obs_after_qc", "n_vars_after_qc", "n_clusters", "n_markers"],
+      "properties": {
+        "n_obs_in": { "type": "integer", "minimum": 0 },
+        "n_vars_in": { "type": "integer", "minimum": 0 },
+        "n_obs_after_qc": { "type": "integer", "minimum": 0 },
+        "n_vars_after_qc": { "type": "integer", "minimum": 0 },
+        "n_clusters": { "type": "integer", "minimum": 0 },
+        "n_markers": { "type": "integer", "minimum": 0 },
+        "method": { "type": "string" },
+        "resolution": { "type": "number" }
+      }
+    }
+  }
+}

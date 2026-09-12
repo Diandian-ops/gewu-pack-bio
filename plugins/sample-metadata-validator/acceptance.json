@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "sample-metadata-validator",
+  "pluginVersion": "1.0.0",
+  "platforms": ["macos-arm64"],
+  "fixtures": [
+    {
+      "id": "valid",
+      "description": "6 samples × 10 genes, WT vs KO, 3 replicates each",
+      "inputs": {
+        "counts": "demo-data/demo-counts.csv",
+        "metadata": "demo-data/demo-metadata.csv",
+        "sample_column": "sample",
+        "design_column": "condition",
+        "reference_group": "WT",
+        "treatment_group": "KO",
+        "min_replicates": 2
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": [
+        "validated_metadata.csv",
+        "sample_alignment.csv",
+        "design_summary.json",
+        "validation_diagnostics.json",
+        "report.html"
+      ]
+    },
+    {
+      "id": "insufficient-replicates",
+      "description": "1 sample per group — should be blocked",
+      "inputs": {
+        "counts": "demo-data/demo-counts-single-rep.csv",
+        "metadata": "demo-data/demo-metadata-single-rep.csv",
+        "sample_column": "sample",
+        "design_column": "condition",
+        "reference_group": "WT",
+        "treatment_group": "KO",
+        "min_replicates": 2
+      },
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "insufficient_replicates"
+    },
+    {
+      "id": "sample-mismatch",
+      "description": "counts has WT_1/WT_2/WT_3 but metadata has Sample_X/Y/Z — severe mismatch",
+      "inputs": {
+        "counts": "demo-data/demo-counts-mismatch.csv",
+        "metadata": "demo-data/demo-metadata-mismatch.csv",
+        "sample_column": "sample",
+        "design_column": "condition",
+        "reference_group": "WT",
+        "treatment_group": "KO",
+        "min_replicates": 2
+      },
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "sample_mismatch"
+    },
+    {
+      "id": "sample-column-missing",
+      "description": "metadata uses sample_id instead of sample column",
+      "inputs": {
+        "counts": "demo-data/demo-counts.csv",
+        "metadata": "demo-data/demo-metadata-no-sample-col.csv",
+        "sample_column": "sample",
+        "design_column": "condition",
+        "reference_group": "WT",
+        "treatment_group": "KO",
+        "min_replicates": 2
+      },
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "sample_id_column_missing"
+    },
+    {
+      "id": "missing-inputs",
+      "description": "No counts or metadata files provided",
+      "inputs": {},
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "missing_required_file_inputs"
+    }
+  ],
+  "reproducibility": {
+    "requireScriptSha256": true,
+    "requireParamsHash": true,
+    "requireInputSha256": true,
+    "requireOutputSha256": true,
+    "requireRVersion": true,
+    "requirePackageVersions": true
+  }
+}

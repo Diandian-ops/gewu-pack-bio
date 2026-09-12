@@ -1,0 +1,24 @@
+{
+  "id": "gene-correlation",
+  "status": "incubating",
+  "pluginManifestVersion": 1,
+  "title": "基因相关性热图",
+  "version": "1.0.0",
+  "language": "r",
+  "description": "计算表达矩阵中 top N 基因的 Pearson/Spearman 相关系数，输出相关性热图 + 系数矩阵 CSV。",
+  "packages": {
+    "r": {
+      "ggplot2": ">=3.4.0",
+      "pheatmap": ">=1.0.12",
+      "png": ">=0.1-8"
+    }
+  },
+  "runtime": {
+    "r": ">=4.3.0"
+  },
+  "builtAgainst": {
+    "r": "4.5"
+  },
+  "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+  "supportedPlatforms": ["macos-arm64", "macos-x64", "windows-x64"]
+}

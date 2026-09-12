@@ -1,0 +1,30 @@
+{
+  "id": "deseq2",
+  "status": "canonical",
+  "pluginManifestVersion": 1,
+  "title": "DESeq2 差异分析",
+  "version": "1.0.0",
+  "language": "r",
+  "sourcePolicy": "builtin-canonical",
+  "description": "Bulk RNA-seq 差异表达基因检测（DESeq2 + lfcShrink(apeglm)）。",
+  "packages": {
+    "r": {
+      "DESeq2": ">=1.40.0",
+      "ggplot2": ">=3.4.0",
+      "ggrepel": ">=0.9.0",
+      "pheatmap": ">=1.0.12",
+      "apeglm": ">=1.20.0",
+      "jsonlite": ">=1.8.0",
+      "base64enc": ">=0.1-3",
+      "png": ">=0.1-8"
+    }
+  },
+  "runtime": {
+    "r": ">=4.4.0"
+  },
+  "builtAgainst": {
+    "r": "4.5"
+  },
+  "platform": ["macos-arm64", "windows-x64"],
+  "supportedPlatforms": ["macos-arm64", "windows-x64"]
+}

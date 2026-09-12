@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "biof3://plugins/scvi-tools/output.schema.json",
+  "title": "scvi-tools output schema",
+  "description": "JSON schema for the 8 expected outputs from scvi-tools.py (files written to <jobDir>/output/).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["outputs", "stats"],
+  "properties": {
+    "outputs": {
+      "type": "array",
+      "description": "List of 8 file names written under jobDir/output/.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "latent_embedding.csv",
+          "normalized_expression.csv",
+          "integrated.h5ad",
+          "latent_umap.png",
+          "latent_umap_batch.png",
+          "training_loss.csv",
+          "qc_summary.csv",
+          "report.html",
+          "manifest.json"
+        ]
+      },
+      "minItems": 1
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["n_obs_in", "n_vars_in", "n_obs_after_qc", "n_vars_after_qc", "n_latent_dim", "train_loss_final"],
+      "properties": {
+        "n_obs_in": { "type": "integer", "minimum": 0 },
+        "n_vars_in": { "type": "integer", "minimum": 0 },
+        "n_obs_after_qc": { "type": "integer", "minimum": 0 },
+        "n_vars_after_qc": { "type": "integer", "minimum": 0 },
+        "n_latent_dim": { "type": "integer", "minimum": 0 },
+        "train_loss_final": { "type": "number", "minimum": 0 },
+        "max_epochs": { "type": "integer", "minimum": 1 },
+        "batch_size": { "type": "integer", "minimum": 8 },
+        "n_hidden": { "type": "integer", "minimum": 16 },
+        "n_layers": { "type": "integer", "minimum": 1 },
+        "learning_rate": { "type": "number", "minimum": 0 },
+        "device": { "type": "string" },
+        "batch_key": { "type": "string" },
+        "layer_used": { "type": "string" },
+        "torch_version": { "type": "string" },
+        "scvi_version": { "type": "string" }
+      }
+    }
+  }
+}

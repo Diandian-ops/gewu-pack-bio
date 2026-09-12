@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>随机生存森林 - 结果解读报告 | BioF3</title>
+  <style>
+  :root { --text: #17201d; --muted: #5c6b64; --border: #dfe8e3; --surface: #f8faf9; --primary: #2e8555; --code-bg: #f4f7f5; --warn: #d97706; --info: #2563eb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: var(--text); font: 14px/1.72 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif; }
+  .report { max-width: 860px; padding: 40px 32px 60px; margin: 0 auto; margin-left: max(200px, calc(50% - 330px)); }
+  .report.full { margin-left: auto; margin-right: auto; }
+  .report-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 32px; position: relative; }
+  .report-header .eyebrow { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; }
+  .report-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .report-header .meta { font-size: 12px; color: var(--muted); }
+  h2 { font-size: 18px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; }
+  p { margin: 0 0 12px; } ul, ol { margin: 0 0 12px; padding-left: 22px; } li { margin-bottom: 4px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 6px; overflow-x: auto; margin: 0 0 16px; font-size: 13px; line-height: 1.5; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 13px; }
+  th, td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
+  th { background: var(--surface); font-weight: 600; }
+  .callout { padding: 14px 16px; border-radius: 6px; margin: 16px 0; font-size: 13px; }
+  .callout-info { background: #eff6ff; border-left: 3px solid var(--info); }
+  .callout-warn { background: #fffbeb; border-left: 3px solid var(--warn); }
+  .callout-tip { background: #ecfdf5; border-left: 3px solid var(--primary); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .fig { margin: 20px 0; text-align: center; }
+  .fig img { max-width: 55%; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.1); cursor: zoom-in; transition: transform .3s; } .fig img.zoomed { max-width: 100%; cursor: zoom-out; }
+  .fig-caption { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card .value { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .biof3-wm { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27200%27%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2728%27 font-weight=%27800%27 fill=%27%232e8555%27 opacity=%270.04%27 transform=%27rotate(-25 150 100)%27%3EBioF3%3C/text%3E%3Ctext x=%2750%25%27 y=%2770%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2710%27 font-weight=%27700%27 fill=%27%232e8555%27 opacity=%270.035%27 transform=%27rotate(-25 150 100)%27%3ESHENGXIN F3%3C/text%3E%3C/svg%3E"); }
+  .nav-wrap { position: fixed; left: 0; top: 0; bottom: 0; width: 200px; background: #f8faf9; border-right: 1px solid #dfe8e3; padding: 20px 12px; overflow-y: auto; font-size: 12px; z-index: 50; transition: transform .2s; box-shadow: 2px 0 8px rgba(0,0,0,.06); }
+  .nav-wrap.hidden { transform: translateX(-100%); box-shadow: none; }
+  .nav-toggle { position: fixed; left: 8px; top: 8px; z-index: 60; background: #fff; border: 1px solid #dfe8e3; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .nav-wrap .nav-title { font-weight: 700; font-size: 13px; margin-bottom: 12px; color: #2e8555; }
+  .nav-wrap a { display: block; padding: 4px 0; color: #5c6b64; text-decoration: none; line-height: 1.4; }
+  .nav-wrap a:hover { color: #2e8555; }
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<button class="nav-toggle" onclick="var n=document.querySelector('.nav-wrap'),r=document.querySelector('.report');n.classList.toggle('hidden');r.classList.toggle('full');this.textContent=n.classList.contains('hidden')?'☰':'✕'" title="切换目录">☰</button>
+<div class="biof3-wm" aria-hidden="true"></div>
+<nav class="nav-wrap" id="reportNav"><div class="nav-title">目录</div></nav>
+
+<div class="report">
+
+<header class="report-header">
+  <div class="eyebrow">BioF3 分析工具 · 结果解读报告</div>
+  <h1>随机生存森林（RSF）预后建模</h1>
+  <p class="meta">工具版本：randomForestSRC · 报告模板 v1.0 · 生成于 BioF3 在线分析平台</p>
+</header>
+
+<!-- ============================================================ -->
+<h2>一、分析概览</h2>
+
+<p>本报告对随机生存森林（Random Survival Forest, RSF）的建模结果进行解读。RSF 是一种非线性生存分析方法，能捕捉传统 Cox 模型难以发现的变量间交互效应和非线性关系，适用于高维基因组数据的预后建模。通过 OOB（Out-Of-Bag）估计和独立验证集评估模型的判别力。</p>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="value">{{samples}}</div><div class="label">样本数</div></div>
+  <div class="stat-card"><div class="value">{{features}}</div><div class="label">特征数</div></div>
+  <div class="stat-card"><div class="value">{{events}}</div><div class="label">事件数</div></div>
+  <div class="stat-card"><div class="value">{{cindex_oob}}</div><div class="label">OOB C-index</div></div>
+</div>
+
+<div class="callout callout-info">
+  <strong>C-index 解读标准</strong>
+  <ul style="margin:0;padding-left:18px;">
+    <li>0.5 = 随机预测（无判别力）</li>
+    <li>0.6-0.7 = 弱判别</li>
+    <li>0.7-0.8 = 尚可</li>
+    <li>0.8-0.9 = 良好</li>
+    <li>&gt;0.9 = 优秀（需警惕过拟合）</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2>二、时间依赖 ROC</h2>
+
+<div class="fig">
+  <img src="{{time_roc.png}}" alt="Time-dependent ROC">
+  <div class="fig-caption">图 1：时间依赖 ROC 曲线。展示模型在 1 年、3 年、5 年时间点的判别能力。AUC 随时间变化反映模型预测能力的衰减情况。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>短期（1 年）AUC 通常最高 -> 近期预测更准</li>
+  <li>若长期（5 年）AUC 仍保持 &gt;0.7 -> 模型具有长期稳定判别力</li>
+  <li>AUC 随时间快速下降 -> 模型仅对近期预后有效</li>
+  <li>与 Cox 模型对比：RSF 的非线性优势在复杂交互数据中更明显</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>三、VIMP 变量重要性</h2>
+
+<div class="fig">
+  <img src="{{vimp.png}}" alt="VIMP">
+  <div class="fig-caption">图 2：变量重要性（VIMP）排序。基于 OOB 置换误差计算，VIMP&gt;0 表示该特征对预测有正贡献，值越大越重要。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>VIMP 排名靠前的特征 -> 对生存预测贡献最大的变量</li>
+  <li>VIMP 接近 0 -> 该特征对模型几乎无贡献</li>
+  <li>VIMP 为负 -> 置换后反而提升预测，可能引入噪声，建议剔除</li>
+  <li>与 Cox p 值对比：VIMP 衡量的是模型内在贡献，p 值是统计显著性，二者互补</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>四、部分依赖图</h2>
+
+<div class="fig">
+  <img src="{{partial_dependence.png}}" alt="Partial Dependence">
+  <div class="fig-caption">图 3：Top N 特征的部分依赖图。展示单一特征值变化时，模型预测风险（Mortality）如何变化，揭示非线性效应。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li>曲线上升 -> 该特征值升高时死亡风险增加</li>
+  <li>曲线下降 -> 该特征值升高时风险降低（保护因子）</li>
+  <li>非单调曲线（如 U 型）-> 存在阈值效应，低和高值都有风险</li>
+  <li>与 Cox 线性假设对比：若部分依赖曲线明显非线性，说明 Cox 会低估该特征的作用</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>五、Risk Score 三联图</h2>
+
+<div class="fig">
+  <img src="{{risk_triple.png}}" alt="Risk Score Triple">
+  <div class="fig-caption">图 4：Risk score 三联图。左=按中位数分高/低危组的 KM 曲线，中=风险得分散点分布，右=风险热图。</div>
+</div>
+
+<p><strong>如何解读：</strong></p>
+<ul>
+  <li><strong>KM 曲线</strong>：高低危组曲线分叉明显且 log-rank p&lt;0.05 -> 风险模型有效分层</li>
+  <li><strong>风险散点</strong>：横轴=样本排序，纵轴=risk score，颜色=事件。理想状态下事件（红点）集中于高风险端</li>
+  <li><strong>风险热图</strong>：展示高/低危组间特征表达差异，定位驱动分层的核心变量</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>六、输出数据文件</h2>
+
+<table>
+  <thead><tr><th>文件名</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><code>cindex_table.csv</code></td><td>C-index 表（train / OOB / test）</td></tr>
+    <tr><td><code>time_roc_table.csv</code></td><td>时间依赖 ROC AUC 表</td></tr>
+    <tr><td><code>vimp_table.csv</code></td><td>VIMP 变量重要性排序表</td></tr>
+    <tr><td><code>time_roc.png / .pdf</code></td><td>时间依赖 ROC（双格式）</td></tr>
+    <tr><td><code>vimp.png / .pdf</code></td><td>VIMP 排序图（双格式）</td></tr>
+    <tr><td><code>partial_dependence.png / .pdf</code></td><td>部分依赖图（双格式）</td></tr>
+    <tr><td><code>risk_triple.png / .pdf</code></td><td>Risk 三联图（双格式）</td></tr>
+    <tr><td><code>model.rds</code></td><td>训练好的 RSF 模型</td></tr>
+    <tr><td><code>summary.txt</code></td><td>分析摘要</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2>七、下游分析建议</h2>
+
+<ol>
+  <li><strong>与 LASSO Cox 对比</strong> - 若已用 lasso-cox 建模，对比二者 C-index，判断线性 vs 非线性模型谁更适合你的数据</li>
+  <li><strong>外部验证</strong> - 在独立队列上计算 risk score 并验证分层效果</li>
+  <li><strong>Nomogram 构建</strong> - 若需临床可解释性，基于 RSF 选出的 top 特征构建 Cox nomogram</li>
+  <li><strong>生物学解释</strong> - 对 VIMP top 基因做通路富集，理解其生物学意义</li>
+  <li><strong>注意过拟合</strong> - OOB C-index 远高于 test C-index 时，考虑减少特征数或增大 nodesize</li>
+</ol>
+
+<div class="callout callout-warn">
+  <strong>注意：RSF vs Cox 的选择</strong>
+  样本量 &lt;100 或事件数 &lt;30 时，RSF 易过拟合，建议优先用 Cox/LASSO Cox。RSF 优势在样本充足且存在复杂非线性交互时才能体现。
+</div>
+
+<!-- ============================================================ -->
+<h2>八、方法学说明（可用于论文 Methods）</h2>
+
+<pre>
+A Random Survival Forest (RSF) was built using the
+randomForestSRC package in R, with 500 trees, logrank
+splitting rule, and default mtry (sqrt of total features).
+Out-of-bag (OOB) error estimation was used for internal
+validation. Variable importance (VIMP) was computed via
+permutation. Time-dependent ROC curves at 1, 3, and 5
+years were generated using the timeROC package. Patients
+were stratified into high/low-risk groups by the median
+RSF risk score, and compared using Kaplan-Meier curves
+with log-rank test.
+</pre>
+
+<!-- ============================================================ -->
+<h2>九、参考资料</h2>
+
+<ul>
+  <li>Ishwaran H, Kogalur UB. Random Survival Forests for R. <em>R News</em>. 2007;7(2):25-31.</li>
+  <li>Ishwaran H, et al. High-dimensional variable selection for survival data. <em>JASA</em>. 2010;105(489):205-217.</li>
+  <li>Blanche P, et al. The time-dependent ROC curves. <em>Biostatistics</em>. 2013;14(1):1-15.</li>
+  <li><a href="https://biof3.com/docs/ml/module03">BioF3 教程：随机生存森林</a></li>
+</ul>
+
+<div class="footer">
+  <p>本报告由 BioF3 在线分析平台自动生成，仅供学习参考。如需用于正式发表，请结合实际数据和实验设计进行调整。</p>
+  <p>BioF3 - AI 陪伴的全组学学习与实战平台 · <a href="https://biof3.com">biof3.com</a></p>
+</div>
+
+</div><!-- /.report -->
+<script>document.querySelectorAll(".fig img").forEach(function(img){img.addEventListener("click",function(){this.classList.toggle("zoomed")})});var nav=document.getElementById("reportNav");if(nav){document.querySelectorAll(".report h2").forEach(function(h,i){h.id=h.id||"s"+i;var a=document.createElement("a");a.href="#"+h.id;a.textContent=h.textContent;nav.appendChild(a)});}</script>
+</body>
+</html>

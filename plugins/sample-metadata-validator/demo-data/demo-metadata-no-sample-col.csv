@@ -1,0 +1,7 @@
+sample_id,condition,batch
+WT_1,WT,b1
+WT_2,WT,b1
+WT_3,WT,b2
+KO_1,KO,b1
+KO_2,KO,b2
+KO_3,KO,b2

@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "scanpy-advanced",
+  "pluginVersion": "1.0.0",
+  "policy": "no-install-required",
+  "notes": "scanpy-advanced 依赖 biof3-py-runtime 内已装的 scanpy>=1.9 / anndata>=0.9 / numpy / pandas / scipy / matplotlib / seaborn / Pillow（见 resources/built-in-plugins/py-runtime-requirements.txt）。本插件不引入额外 pip install 步骤；PHASE 1 SUB-1.1 边界内 runtime **不扩展**。",
+  "steps": []
+}

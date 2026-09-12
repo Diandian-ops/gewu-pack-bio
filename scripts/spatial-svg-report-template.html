@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>空间高变基因多方法鉴定 - 结果解读报告 | BioF3</title>
+  <style>
+  :root { --text: #17201d; --muted: #5c6b64; --border: #dfe8e3; --surface: #f8faf9; --primary: #2e8555; --code-bg: #f4f7f5; --warn: #d97706; --info: #2563eb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; color: var(--text); font: 14px/1.72 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif; }
+  .report { max-width: 860px; padding: 40px 32px 60px; margin: 0 auto; margin-left: max(200px, calc(50% - 330px)); }
+  .report.full { margin-left: auto; margin-right: auto; }
+  .report-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 32px; }
+  .report-header .eyebrow { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; }
+  .report-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .report-header .meta { font-size: 12px; color: var(--muted); }
+  h2 { font-size: 18px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  p { margin: 0 0 12px; } ul, ol { margin: 0 0 12px; padding-left: 22px; } li { margin-bottom: 4px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 13px; }
+  th, td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
+  th { background: var(--surface); font-weight: 600; }
+  .callout { padding: 14px 16px; border-radius: 6px; margin: 16px 0; font-size: 13px; }
+  .callout-info { background: #eff6ff; border-left: 3px solid var(--info); }
+  .fig { margin: 20px 0; text-align: center; }
+  .fig img { max-width: 60%; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.1); cursor: zoom-in; } .fig img.zoomed { max-width: 100%; cursor: zoom-out; }
+  .fig-caption { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card .value { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; align-items: flex-start; }
+  .footer-qr { width: 56px; height: 56px; border-radius: 4px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+<div class="report">
+
+<header class="report-header">
+  <div class="eyebrow">BioF3 分析工具 · 结果解读报告</div>
+  <h1>空间高变基因多方法鉴定（SVG）</h1>
+  <p class="meta">工具版本：squidpy (Moran's I + Geary's C + Sepal) · 生成于 BioF3 在线分析平台</p>
+</header>
+
+<h2>一、分析概览</h2>
+<p>本报告对三种空间自相关方法鉴定 SVG 的结果进行对比解读。采用 Moran's I（全局自相关）、Geary's C（局部差异）和 Sepal（扩散时间法）交叉验证，只有被 ≥{{min_methods}} 种方法同时选中的基因才被认定为 robust SVG。</p>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="value">{{n_spots}}</div><div class="label">Spot 数</div></div>
+  <div class="stat-card"><div class="value">{{n_genes_tested}}</div><div class="label">测试基因数</div></div>
+  <div class="stat-card"><div class="value">{{n_robust}}</div><div class="label">Robust SVG 数</div></div>
+  <div class="stat-card"><div class="value">{{min_methods}}</div><div class="label">共识阈值</div></div>
+</div>
+
+<div class="callout callout-info">
+  <strong>三方法对比</strong>
+  <ul style="margin:0;padding-left:18px;">
+    <li><strong>Moran's I</strong>（{{n_moran_top}} 个 top）：全局空间自相关，正值=空间聚集表达</li>
+    <li><strong>Geary's C</strong>（{{n_geary_top}} 个 top）：局部空间差异，低值=局部相似（聚集）</li>
+    <li><strong>Sepal</strong>（{{n_sepal_top}} 个 top）：扩散时间法，偏好平滑模式化分布</li>
+    <li>排列次数: {{nPerms}} | 每方法 Top-N: {{topN}}</li>
+  </ul>
+</div>
+
+<h2>二、父聚类上下文</h2>
+<div class="fig">
+  <img src="{{plot_001_spatial_clusters.png}}" alt="空间聚类">
+  <div class="fig-caption">图 1：上游 spatial-standard 的空间聚类分布，作为 SVG 分析的上下文参考。</div>
+</div>
+
+<h2>三、Top Robust SVGs 空间分布</h2>
+<div class="fig">
+  <img src="{{plot_002_top_robust_svgs.png}}" alt="Top Robust SVGs">
+  <div class="fig-caption">图 2：Top-4 robust SVGs 的空间表达分布。展示跨方法共识最强的基因在组织中的表达模式。</div>
+</div>
+<p><strong>Top Robust SVGs</strong>：{{top_robust_list}}</p>
+
+<h2>四、三方法 Venn 图</h2>
+<div class="fig">
+  <img src="{{plot_003_method_venn.png}}" alt="方法 Venn">
+  <div class="fig-caption">图 3：三种方法的 Top-N SVG 交集 Venn 图。中心重叠区域为 robust SVG（≥{{min_methods}} 方法选中）。</div>
+</div>
+<ul>
+  <li>三方法交集大 -> SVG 信号稳健，空间模式明显</li>
+  <li>交集小 -> 各方法视角不同，需关注 robust 集合</li>
+</ul>
+
+<h2>五、分数相关性</h2>
+<div class="fig">
+  <img src="{{plot_004_score_corr.png}}" alt="分数相关性">
+  <div class="fig-caption">图 4：三方法评分散点图矩阵。衡量不同方法对同一基因的空间自相关评分一致性。</div>
+</div>
+
+<h2>六、下游建议</h2>
+<ol>
+  <li><strong>功能富集</strong> - 对 robust SVG 列表做 GO/KEGG 富集，注释空间模式生物学意义</li>
+  <li><strong>解卷积</strong> - 进入 spatial-deconv 推断细胞类型</li>
+  <li><strong>配体-受体</strong> - 进入 spatial-lr 分析通讯</li>
+</ol>
+
+<div class="footer">
+  <div>
+    <p>BioF3 - AI 陪伴的全组学学习与实战平台 · <a href="https://biof3.com">biof3.com</a></p>
+    <p>本报告自动生成，仅供学习参考。</p>
+  </div>
+  <img class="footer-qr" src="{{WECHAT_QR_BASE64}}" alt="QR">
+</div>
+
+</div>
+<script>document.querySelectorAll(".fig img").forEach(function(img){img.addEventListener("click",function(){this.classList.toggle("zoomed")})});</script>
+</body>
+</html>

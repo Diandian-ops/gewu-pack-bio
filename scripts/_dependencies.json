@@ -1,0 +1,76 @@
+{
+  "$comment": "BLOCK-58 R 工具依赖单一事实源。内置 tool-scripts 的工具专属依赖（biof3-r-runtime 70+ 基础包之外的部分）。执行路径零安装：脚本对 packages 做毫秒级 fail-fast（MISSING_R_PACKAGES），显式补装走 scripts/install-r-tool-dependencies.mjs。source: cran=CRAN binary/source，bioc=Bioconductor（经 BiocManager）。与各 _scope.md 范围卡对齐；一致性由 test/tool-scripts-dependencies.test.mjs 门禁校验（JSON packages ∪ runtimeProvided ⊇ 脚本 library() 引用）。",
+  "runtimeProvided": [
+    "ggplot2",
+    "ggrepel",
+    "jsonlite",
+    "cluster",
+    "gridExtra",
+    "pheatmap",
+    "survival"
+  ],
+  "tools": {
+    "consensus-cluster": {
+      "script": "consensus-cluster.R",
+      "packages": {
+        "ConsensusClusterPlus": "cran",
+        "NMF": "cran",
+        "mclust": "cran"
+      }
+    },
+    "mo-snf": {
+      "script": "mo-snf.R",
+      "packages": {
+        "SNFtool": "cran",
+        "mclust": "cran"
+      }
+    },
+    "shap-explain": {
+      "script": "shap-explain.R",
+      "packages": {
+        "iml": "cran",
+        "e1071": "cran",
+        "randomForest": "cran",
+        "xgboost": "cran",
+        "glmnet": "cran"
+      }
+    },
+    "ml-classifier": {
+      "script": "ml-classifier.R",
+      "packages": {
+        "glmnet": "cran",
+        "e1071": "cran",
+        "randomForest": "cran",
+        "xgboost": "cran",
+        "pROC": "cran"
+      }
+    },
+    "rsf-survival": {
+      "script": "rsf-survival.R",
+      "packages": {
+        "randomForestSRC": "cran",
+        "timeROC": "cran",
+        "pec": "cran",
+        "survminer": "cran"
+      }
+    },
+    "mo-mofa": {
+      "script": "mo-mofa.R",
+      "packages": {
+        "MOFA2": "bioc"
+      }
+    },
+    "ml-feature-select": {
+      "script": "ml-feature-select.R",
+      "packages": {
+        "caret": "cran",
+        "Boruta": "cran",
+        "mRMRe": "cran",
+        "glmnet": "cran",
+        "e1071": "cran",
+        "ranger": "cran",
+        "VennDiagram": "cran"
+      }
+    }
+  }
+}

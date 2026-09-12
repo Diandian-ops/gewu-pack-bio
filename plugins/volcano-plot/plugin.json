@@ -1,0 +1,24 @@
+{
+  "id": "volcano-plot",
+  "status": "canonical",
+  "pluginManifestVersion": 1,
+  "title": "火山图绘制",
+  "version": "1.0.0",
+  "language": "r",
+  "description": "从差异分析结果（log2FC + 默认 padj）绘制 publication-ready 火山图，支持阈值标注与 top 基因高亮。",
+  "packages": {
+    "r": {
+      "ggplot2": ">=3.4.0",
+      "ggrepel": ">=0.9.0",
+      "png": ">=0.1-8"
+    }
+  },
+  "runtime": {
+    "r": ">=4.3.0"
+  },
+  "builtAgainst": {
+    "r": "4.5"
+  },
+  "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+  "supportedPlatforms": ["macos-arm64", "macos-x64", "windows-x64"]
+}
