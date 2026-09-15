@@ -2,7 +2,7 @@
   "packId": "gewu-pack-bio",
   "name": "格物 · 生信分析包",
   "nameEn": "Gewu Bioinformatics Analysis Pack",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "kind": "domain-pack",
   "description": "格物桌面的生信垂直领域包：分析插件、R/Python 分析脚本、演示数据、科学校验与确认钩子、R 运行时档案。安装后生信能力出现在工作台分析入口与插件商店；卸载即回到纯通用 agent 工作台。",
   "provides": {
