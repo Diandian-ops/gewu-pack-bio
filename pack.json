@@ -9,9 +9,18 @@
     "plugins": "plugins/",
     "scripts": "scripts/",
     "demoData": "demo-data/",
-    "languages": ["r", "python"],
-    "confirmationHooks": ["scientific-task-confirmation"],
-    "artifactTypes": ["plot", "table", "report"]
+    "languages": [
+      "r",
+      "python"
+    ],
+    "confirmationHooks": [
+      "scientific-task-confirmation"
+    ],
+    "artifactTypes": [
+      "plot",
+      "table",
+      "report"
+    ]
   },
   "requires": {
     "core": ">=0.0.1-rc.7",
@@ -21,6 +30,16 @@
       "task-confirmation-hooks",
       "tool-catalog-projection",
       "script-host:executor"
+    ],
+    "runtimes": [
+      {
+        "pluginId": "biof3-r-runtime",
+        "version": ">=1.0.0"
+      },
+      {
+        "pluginId": "biof3-py-runtime",
+        "version": ">=1.0.0"
+      }
     ]
   },
   "install": {
